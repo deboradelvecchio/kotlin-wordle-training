@@ -50,5 +50,6 @@
   "files.associations": {
     "openapi.yaml": "yaml",
     "openapi.yml": "yaml"
-  }
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }

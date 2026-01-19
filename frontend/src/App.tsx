@@ -1,28 +1,33 @@
+import { Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import { Game } from '@pages/Game'
+import { Leaderboard } from '@pages/Leaderboard'
 import './App.css'
-import { useHealth } from './hooks/useHealth'
 
 function App() {
-  const { data, isLoading, error } = useHealth()
-
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
-
-  if (data) {
-    return (
-      <div className="app">
-        <h1>Wordle Training</h1>
-      </div>
-    )
-  }
-
   return (
     <div className="app">
-      <h1>Wordle Training</h1>
-
-      <div className="card">
-        <p>Ready to build Wordle! 🎮</p>
-        <p>React Query is configured and ready to use.</p>
-      </div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: '#ff4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+      <Routes>
+        <Route path="/" element={<Game />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+      </Routes>
     </div>
   )
 }
