@@ -84,6 +84,13 @@
             <artifactId>kotlin-stdlib</artifactId>
         </dependency>
 
+        <!-- Kotlinx Serialization (required for @Serializable models) -->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json</artifactId>
+            <version>${serialization.version}</version>
+        </dependency>
+
         <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -120,6 +127,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
+                    <mainClass>com.doctolib.kotlinwordletraining.ApplicationKt</mainClass>
                 </configuration>
             </plugin>
             <plugin>

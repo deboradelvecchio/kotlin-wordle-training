@@ -1,4 +1,5 @@
-import { get, post, put, del } from './client'
+import { get } from './client'
+import type { HealthResponse } from './models/HealthResponse'
 
 /**
  * Wordle API functions
@@ -13,13 +14,5 @@ import { get, post, put, del } from './client'
  */
 
 export const wordleApi = {
-  // TODO: Add your Wordle API endpoints here
-  // Example:
-  // getGame: (id: string) => get<Game>(`/games/${id}`),
-  // createGame: (data: CreateGameRequest) => post<Game>('/games', data),
-  // updateGame: (id: string, data: UpdateGameRequest) => put<Game>(`/games/${id}`, data),
-  // deleteGame: (id: string) => del<void>(`/games/${id}`),
+  getHealth: () => get<HealthResponse>('/health'),
 }
-
-// Export client functions for direct use if needed
-export { get, post, put, del }

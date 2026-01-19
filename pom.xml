@@ -26,6 +26,7 @@
         <sonar.projectName>kotlin-wordle-training</sonar.projectName>
         <sonar.projectKey>com.doctolib.kotlinwordletraining:kotlin-wordle-training</sonar.projectKey>
         <doctoboot.tooling.version>1.2.0</doctoboot.tooling.version>
+        <serialization.version>1.7.3</serialization.version>
     </properties>
 
     <dependencyManagement>
@@ -75,6 +76,7 @@
                         <compilerPlugins>
                             <plugin>spring</plugin>
                             <plugin>jpa</plugin>
+                            <plugin>kotlinx-serialization</plugin>
                         </compilerPlugins>
                     </configuration>
                     <dependencies>
@@ -86,6 +88,11 @@
                         <dependency>
                             <groupId>org.jetbrains.kotlin</groupId>
                             <artifactId>kotlin-maven-allopen</artifactId>
+                            <version>${kotlin.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-maven-serialization</artifactId>
                             <version>${kotlin.version}</version>
                         </dependency>
                     </dependencies>

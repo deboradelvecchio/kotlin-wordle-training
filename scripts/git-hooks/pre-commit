@@ -1,12 +1,28 @@
 #!/bin/sh
 #
-# Pre-commit hook to run Spotless formatting
+# Pre-commit hook to run formatting (Spotless for backend, Prettier for frontend)
 #
 
-echo "Running Spotless formatting..."
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
-# Run spotless:apply to format code
-./mvnw spotless:apply
+# Check if there are backend changes (Kotlin files)
+BACKEND_CHANGES=$(echo "$STAGED_FILES" | grep -E '\.(kt|java)$' || true)
+
+# Check if there are frontend changes (TypeScript/React files)
+FRONTEND_CHANGES=$(echo "$STAGED_FILES" | grep -E 'frontend/.*\.(ts|tsx|js|jsx|json|css)$' || true)
+
+# Run Spotless if there are backend changes
+if [ -n "$BACKEND_CHANGES" ]; then
+    echo "Running Spotless formatting for backend..."
+    ./mvnw spotless:apply
+fi
+
+# Run Prettier if there are frontend changes
+if [ -n "$FRONTEND_CHANGES" ]; then
+    echo "Running Prettier formatting for frontend..."
+    cd frontend && npm run format && cd ..
+fi
 
 # Stage any formatting changes automatically
 if ! git diff --quiet; then

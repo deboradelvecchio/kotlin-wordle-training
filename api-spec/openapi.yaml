@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: Wordle Training API
+  version: 1.0.0
+  description: API for the Wordle training workshop
+
+servers:
+  - url: http://localhost:8080/kotlin-wordle-training/api
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: health
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    # Health schemas - referenced from external file
+    HealthResponse:
+      $ref: './schemas/health.yaml#/HealthResponse'
+    
+    # Game schemas - add your game-related schemas here
+    # Example:
+    # Game:
+    #   type: object
+    #   properties:
+    #     id:
+    #       type: string
+    #       format: uuid
+    #     word:
+    #       type: string
+    #       minLength: 5
+    #       maxLength: 5
+    #   required:
+    #     - id
+    #     - word

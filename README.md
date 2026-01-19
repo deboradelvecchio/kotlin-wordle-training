@@ -100,6 +100,15 @@ For [IntelliJ](https://www.jetbrains.com/idea/buy/) you can use:
 * [Spotless Applier](https://plugins.jetbrains.com/plugin/22455-spotless-applier)
 * [META ktfmt](https://plugins.jetbrains.com/plugin/14912-ktfmt)
 
+### API Models
+
+API models are defined manually in both backend and frontend:
+
+- **Backend (Kotlin)**: Models are in `application/src/main/kotlin/com/doctolib/kotlinwordletraining/model/`
+- **Frontend (TypeScript)**: Models are in `frontend/src/api/models/`
+
+The OpenAPI specification in `api-spec/` serves as documentation and reference, but models are maintained manually to keep full control over the code.
+
 ### Useful Links
 
 * Actuator Endpoint: http://localhost:8080/actuator
