@@ -1,0 +1,46 @@
+# from https://github.com/confluentinc/cp-all-in-one/tree/7.5.0-post/cp-all-in-one-community
+---
+services:
+  kotlin-wordle-training_postgres:
+    image: postgres:15.14@sha256:2a75754bd71703145985429c5e3fd1fa4e4699940610c058748549cde66a0628
+    ports:
+      - '127.0.0.1:${DATABASE_PORT:-55432}:5432'
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=${USER}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', '${USER}']
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    restart: unless-stopped
+
+  keymock:
+    image: 580698825394.dkr.ecr.eu-central-1.amazonaws.com/keymock:latest_main
+    container_name: keymock
+    profiles: [authn]
+    ports:
+      - "${KEYMOCK_HTTP_PORT:-8880}:8080"
+      - "${KEYMOCK_HTTPS_PORT:-8443}:8443"
+    environment:
+      # Customize these values as needed
+      - KEYMOCK_ACCESS_TOKEN_EXPIRATION=86400
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    extra_hosts: # seems not to work on macOS
+      - "auth-dev.doctolib.com:127.0.0.1"
+      - "auth-dev.doctolib.de:127.0.0.1"
+      - "auth-dev.doctolib.fr:127.0.0.1"
+      - "auth-dev.doctolib.it:127.0.0.1"
+
+volumes:
+  postgres_data:

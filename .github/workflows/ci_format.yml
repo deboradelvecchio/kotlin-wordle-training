@@ -1,0 +1,13 @@
+name: (CI) Format
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  format:
+    name: Format
+    uses: doctolib/doctoboot-archetype/.github/workflows/rw_gp_back_format.yml@12121abd8fbfe227d306c8adc051cf7bb438f9b1 # cicdgp-v1.4.0

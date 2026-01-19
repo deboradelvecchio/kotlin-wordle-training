@@ -1,0 +1,20 @@
+name: (Auto) Automate PR actions
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  auto_merge:
+    name: "Auto Merge"
+    runs-on: prod-linux-xs
+    timeout-minutes: 5
+    if: ${{ github.event.label.name == 'auto-merge' }}
+    steps:
+      - name: Auto-Merge PR
+        uses: doctolib/actions/auto-merge@634f51ef5d5f58fa18328c2bef9112344d133520 # auto-merge-v0.1.2
+        with:
+          pr-url: ${{ github.event.pull_request.html_url }}

@@ -1,0 +1,17 @@
+server:
+  shutdown: graceful
+
+spring:
+  application.name: kotlin-wordle-training-migrator
+  main:
+    web-application-type: none
+    allow-bean-definition-overriding: false
+  profiles.include:
+    - migrate
+  liquibase:
+    enabled: true
+    change-log: classpath:db/db-changelog.xml
+
+doctoboot:
+  feature.switches.enabled: false
+  authentication.enabled: false

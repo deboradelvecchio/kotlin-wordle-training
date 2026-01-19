@@ -1,0 +1,11 @@
+---
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate.ddl-auto: none
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:55432}/${DATABASE_NAME:kotlin-wordle-training-dev}
+    username: "${DATABASE_USER:db_user}"
+    password: "${DATABASE_PASSWORD:db_pass}"
+    driver-class-name: org.postgresql.Driver

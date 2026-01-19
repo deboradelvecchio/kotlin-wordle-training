@@ -1,0 +1,17 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: kotlin-wordle-training
+  description: "kotlin wordle training"
+  tags:
+    - kotlin
+    - postgresql
+  annotations:
+    github.com/project-slug: doctolib/kotlin-wordle-training
+    github.com/project-readme-path: README.md
+    backstage.io/techdocs-ref: dir:./doc/
+spec:
+  type: application
+  owner: modus
+  lifecycle: experimental

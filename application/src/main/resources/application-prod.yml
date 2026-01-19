@@ -1,0 +1,18 @@
+# This is just an example. Production configuration shall be configured via environment variables
+doctoboot:
+  authentication:
+    enabled: true
+    trusted-issuers:
+    - issuer: http://keycloak-pros-http.keycloak.svc:8180/pro/realms/doctolib-pro
+      jwks_uri: http://keycloak-pros-http.keycloak.svc:8180/realms/doctolib-pro/protocol/openid-connect/certs
+    - issuer: http://keycloak-patients-http.keycloak.svc:8180/patient/realms/doctolib-patient
+      jwks_uri: http://keycloak-patients-http.keycloak.svc:8180/realms/doctolib-patient/protocol/openid-connect/certs
+
+# dogstatsd only for staging/production
+management:
+  statsd:
+    metrics:
+      export.enabled: true
+  endpoint:
+    prometheus.enabled: false
+
