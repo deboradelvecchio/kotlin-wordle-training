@@ -1,4 +1,5 @@
 import type { Attempt, GameState } from '@api/models/WordOfTheDayResponse'
+import { GAME_CONSTANTS, isGameActive } from '@utils/gameState'
 
 type BoardProps = {
   attempts: Attempt[]
@@ -6,30 +7,34 @@ type BoardProps = {
   gameState: GameState
 }
 
-const MAX_ATTEMPTS = 6
-const WORD_LENGTH = 5
-
 export function Board({ attempts, currentWord, gameState }: BoardProps) {
-  const isActive = gameState === 'in_progress' || gameState === 'not_started'
-  const rowsToShow = MAX_ATTEMPTS - attempts.length - (isActive ? 1 : 0)
+  const isActive = isGameActive(gameState)
+  const rowsToShow =
+    GAME_CONSTANTS.MAX_ATTEMPTS - attempts.length - (isActive ? 1 : 0)
 
-  const rows = [
-    ...attempts.map((attempt, i) => (
-      <Row
-        key={`attempt-${i}`}
-        word={attempt.word}
-        feedback={attempt.feedback}
-      />
-    )),
-    ...(isActive
-      ? [<Row key="current" word={currentWord} feedback={null} isCurrent />]
-      : []),
-    ...Array.from({ length: rowsToShow }, (_, i) => (
-      <Row key={`empty-${i}`} word="" feedback={null} />
-    )),
-  ]
+  const attemptRows = attempts.map((attempt, index) => (
+    <Row
+      key={`attempt-${index}`}
+      word={attempt.word}
+      feedback={attempt.feedback}
+    />
+  ))
 
-  return <div className="board">{rows}</div>
+  const currentRow = isActive ? (
+    <Row key="current" word={currentWord} feedback={null} isCurrent />
+  ) : null
+
+  const emptyRows = Array.from({ length: rowsToShow }, (_, index) => (
+    <Row key={`empty-${index}`} word="" feedback={null} />
+  ))
+
+  return (
+    <div className="board">
+      {attemptRows}
+      {currentRow}
+      {emptyRows}
+    </div>
+  )
 }
 
 type RowProps = {
@@ -42,7 +47,7 @@ type RowProps = {
 }
 
 function Row({ word, feedback, isCurrent = false }: RowProps) {
-  const cells = Array.from({ length: WORD_LENGTH }, (_, i) => {
+  const cells = Array.from({ length: GAME_CONSTANTS.WORD_LENGTH }, (_, i) => {
     const letter = word[i] || ''
     const status = feedback?.[i]?.status || null
     return (

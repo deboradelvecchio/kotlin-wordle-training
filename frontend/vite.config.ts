@@ -13,7 +13,15 @@ export default defineConfig({
       '@components': path.resolve(__dirname, './src/components'),
       '@pages': path.resolve(__dirname, './src/pages'),
       '@contexts': path.resolve(__dirname, './src/contexts'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@test': path.resolve(__dirname, './src/test'),
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    css: true,
   },
   server: {
     host: '0.0.0.0', // Allow access from outside container

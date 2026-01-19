@@ -1,4 +1,6 @@
 import type { Attempt } from '@api/models/WordOfTheDayResponse'
+import { calculateLetterStatuses } from '@utils/keyboard'
+import type { LetterStatus } from '@utils/keyboard'
 
 type KeyboardProps = {
   onLetterClick: (letter: string) => void
@@ -11,7 +13,32 @@ const KEYBOARD_ROWS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
   ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
-]
+] as const
+
+const LAST_ROW_INDEX = 2
+
+function getKeyClassName(status: LetterStatus | undefined): string {
+  const baseClass = 'keyboard-key'
+  return status ? `${baseClass} key-${status}` : baseClass
+}
+
+type KeyboardKeyProps = {
+  letter: string
+  status: LetterStatus | undefined
+  onClick: () => void
+}
+
+function KeyboardKey({ letter, status, onClick }: KeyboardKeyProps) {
+  return (
+    <button
+      className={getKeyClassName(status)}
+      onClick={onClick}
+      aria-label={`Key ${letter}`}
+    >
+      {letter}
+    </button>
+  )
+}
 
 export function Keyboard({
   onLetterClick,
@@ -19,50 +46,30 @@ export function Keyboard({
   onEnter,
   attempts,
 }: KeyboardProps) {
-  const letterStatuses = new Map<string, 'correct' | 'present' | 'absent'>()
-
-  attempts.forEach(attempt => {
-    attempt.feedback.forEach(feedback => {
-      const letter = feedback.letter.toUpperCase()
-      const currentStatus = letterStatuses.get(letter)
-
-      if (!currentStatus || currentStatus === 'absent') {
-        letterStatuses.set(letter, feedback.status)
-      } else if (currentStatus === 'present' && feedback.status === 'correct') {
-        letterStatuses.set(letter, 'correct')
-      }
-    })
-  })
+  const letterStatuses = calculateLetterStatuses(attempts)
 
   return (
     <div className="keyboard">
       {KEYBOARD_ROWS.map((row, rowIndex) => (
         <div key={rowIndex} className="keyboard-row">
-          {rowIndex === 2 && (
+          {rowIndex === LAST_ROW_INDEX && (
             <button className="keyboard-key key-enter" onClick={onEnter}>
               Enter
             </button>
           )}
-          {row.map(letter => {
-            const status = letterStatuses.get(letter)
-            let className = 'keyboard-key'
-            if (status) {
-              className += ` key-${status}`
-            }
-            return (
-              <button
-                key={letter}
-                className={className}
-                onClick={() => onLetterClick(letter)}
-              >
-                {letter}
-              </button>
-            )
-          })}
-          {rowIndex === 2 && (
+          {row.map(letter => (
+            <KeyboardKey
+              key={letter}
+              letter={letter}
+              status={letterStatuses.get(letter)}
+              onClick={() => onLetterClick(letter)}
+            />
+          ))}
+          {rowIndex === LAST_ROW_INDEX && (
             <button
               className="keyboard-key key-backspace"
               onClick={onBackspace}
+              aria-label="Backspace"
             >
               ⌫
             </button>

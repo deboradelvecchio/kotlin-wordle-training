@@ -1,8 +1,7 @@
 export type WordOfTheDayResponse = {
-  word: string
-  date: string // ISO date string
-  attempts?: Attempt[] // Only if authenticated
-  gameState?: GameState // Only if authenticated
+  date: string
+  attempts?: Attempt[]
+  gameState?: GameState
 }
 
 export type Attempt = {
