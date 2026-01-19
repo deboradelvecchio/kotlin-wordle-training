@@ -74,7 +74,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <!-- Language support -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>

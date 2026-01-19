@@ -1,4 +1,4 @@
-package com.doctolib.kotlinwordletraining.configuration;
+package com.doctolib.kotlinwordletraining.configuration
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Qualifier
@@ -9,16 +9,15 @@ import org.springframework.security.authentication.AuthenticationManagerResolver
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher
 
 /**
- * Security configuration for HTTP endpoints and filter chains.
- * Configures different security filter chains based on authentication settings,
- * with separate handling for public endpoints and internal interservice communication.
+ * Security configuration for HTTP endpoints and filter chains. Configures different security filter
+ * chains based on authentication settings, with separate handling for public endpoints and internal
+ * interservice communication.
  */
 @Configuration
 @EnableWebSecurity
@@ -32,9 +31,10 @@ class SecurityFilterConfiguration {
     @ConditionalOnProperty(name = ["doctoboot.authentication.enabled"], havingValue = "false")
     fun openEndpointsSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         val openEndpointMatchers = NegatedRequestMatcher(AntPathRequestMatcher(INTERNAL_PATH))
-        return http.securityMatcher(openEndpointMatchers)
+        return http
+            .securityMatcher(openEndpointMatchers)
             .authorizeHttpRequests { request -> request.anyRequest().permitAll() }
-            .csrf{ it.disable() }
+            .csrf { it.disable() }
             .build()
     }
 
@@ -44,17 +44,17 @@ class SecurityFilterConfiguration {
         http: HttpSecurity,
         @Qualifier("anonymousAuthorizationAuthenticationManagerResolver")
         anonymousAuthenticationManagerResolver: AuthenticationManagerResolver<HttpServletRequest>,
-        @Qualifier("httpAuthorizationBearerTokenResolver")
-        bearerTokenResolver: BearerTokenResolver
+        @Qualifier("httpAuthorizationBearerTokenResolver") bearerTokenResolver: BearerTokenResolver,
     ): SecurityFilterChain {
         val openEndpointMatchers = NegatedRequestMatcher(AntPathRequestMatcher(INTERNAL_PATH))
-        return http.securityMatcher(openEndpointMatchers)
+        return http
+            .securityMatcher(openEndpointMatchers)
             .authorizeHttpRequests { request -> request.anyRequest().permitAll() }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.authenticationManagerResolver(anonymousAuthenticationManagerResolver)
                 oauth2.bearerTokenResolver(bearerTokenResolver)
             }
-            .csrf{ it.disable() }
+            .csrf { it.disable() }
             .build()
     }
 
@@ -65,15 +65,16 @@ class SecurityFilterConfiguration {
         @Qualifier("interserviceAuthorizationAuthenticationManagerResolver")
         authenticationManagerResolver: AuthenticationManagerResolver<HttpServletRequest>,
         @Qualifier("interserviceAuthorizationBearerTokenResolver")
-        bearerTokenResolver: BearerTokenResolver
+        bearerTokenResolver: BearerTokenResolver,
     ): SecurityFilterChain {
-        return http.securityMatcher(INTERNAL_PATH)
+        return http
+            .securityMatcher(INTERNAL_PATH)
             .authorizeHttpRequests { auth -> auth.anyRequest().authenticated() }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.authenticationManagerResolver(authenticationManagerResolver)
                 oauth2.bearerTokenResolver(bearerTokenResolver)
             }
-            .csrf{ it.disable() }
+            .csrf { it.disable() }
             .build()
     }
 }
