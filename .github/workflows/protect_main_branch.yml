@@ -9,10 +9,29 @@ jobs:
   prevent-direct-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if push is from a pull request
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      
+      - name: Check if push is from a pull request merge
         run: |
-          if [ -z "${{ github.event.pull_request }}" ]; then
+          # Check if this is a merge commit (has multiple parents)
+          PARENT_COUNT=$(git rev-list --parents -n 1 HEAD | wc -w)
+          PARENT_COUNT=$((PARENT_COUNT - 1))
+          
+          # Check if the actor is the GitHub Actions bot or if it's a merge commit
+          if [ "$PARENT_COUNT" -lt 2 ] && [ "${{ github.actor }}" != "github-actions[bot]" ]; then
             echo "❌ ERROR: Direct pushes to main branch are not allowed!"
-            echo "Please create a pull request to merge your changes."
+            echo "All changes to main must go through a pull request."
+            echo ""
+            echo "To fix this:"
+            echo "1. Create a new branch: git checkout -b feature/your-feature"
+            echo "2. Push your branch: git push origin feature/your-feature"
+            echo "3. Create a pull request on GitHub"
+            echo ""
+            echo "For repository administrators: Configure branch protection rules in Settings → Branches"
             exit 1
           fi
+          
+          echo "✅ Push appears to be from a pull request merge or automated process"
