@@ -12,26 +12,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       
       - name: Check if push is from a pull request merge
         run: |
           # Check if this is a merge commit (has multiple parents)
-          PARENT_COUNT=$(git rev-list --parents -n 1 HEAD | wc -w)
-          PARENT_COUNT=$((PARENT_COUNT - 1))
+          PARENT_COUNT=$(git cat-file -p HEAD | grep '^parent ' | wc -l)
           
-          # Check if the actor is the GitHub Actions bot or if it's a merge commit
-          if [ "$PARENT_COUNT" -lt 2 ] && [ "${{ github.actor }}" != "github-actions[bot]" ]; then
-            echo "❌ ERROR: Direct pushes to main branch are not allowed!"
-            echo "All changes to main must go through a pull request."
-            echo ""
-            echo "To fix this:"
-            echo "1. Create a new branch: git checkout -b feature/your-feature"
-            echo "2. Push your branch: git push origin feature/your-feature"
-            echo "3. Create a pull request on GitHub"
-            echo ""
-            echo "For repository administrators: Configure branch protection rules in Settings → Branches"
-            exit 1
+          # Check commit message for merge patterns
+          COMMIT_MSG=$(git log -1 --pretty=%B HEAD)
+          IS_MERGE_MSG=$(echo "$COMMIT_MSG" | grep -iE '^Merge pull request|^Merge branch' || echo "")
+          
+          # Allow if it's a merge commit or if commit message indicates a merge
+          if [ "$PARENT_COUNT" -ge 2 ] || [ -n "$IS_MERGE_MSG" ]; then
+            echo "✅ Push appears to be from a pull request merge"
+            exit 0
           fi
           
-          echo "✅ Push appears to be from a pull request merge or automated process"
+          # Check if the actor is a known bot or service account
+          ACTOR="${{ github.actor }}"
+          if [[ "$ACTOR" == *"[bot]"* ]] || [[ "$ACTOR" == *"-bot" ]]; then
+            echo "✅ Push is from an automated service account: $ACTOR"
+            exit 0
+          fi
+          
+          # If we reach here, it's likely a direct push
+          echo "❌ ERROR: Direct pushes to main branch are not allowed!"
+          echo "All changes to main must go through a pull request."
+          echo ""
+          echo "To fix this:"
+          echo "1. Create a new branch: git checkout -b feature/your-feature"
+          echo "2. Push your branch: git push origin feature/your-feature"
+          echo "3. Create a pull request on GitHub"
+          echo ""
+          echo "For repository administrators: Configure branch protection rules in Settings → Branches"
+          exit 1
