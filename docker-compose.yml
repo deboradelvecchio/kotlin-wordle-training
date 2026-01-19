@@ -42,5 +42,31 @@ services:
       - "auth-dev.doctolib.fr:127.0.0.1"
       - "auth-dev.doctolib.it:127.0.0.1"
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount source code for hot reload
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
+      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
+      - ./frontend/package.json:/app/package.json
+      # Keep node_modules in container to avoid permission issues
+      - frontend_node_modules:/app/node_modules
+    environment:
+      - VITE_API_URL=http://host.docker.internal:8080/kotlin-wordle-training
+      - BACKEND_URL=http://host.docker.internal:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  frontend_node_modules:

@@ -36,3 +36,8 @@ build/
 *.log
 .DS_Store
 layers/
+
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
