@@ -6,6 +6,30 @@
 
 This is a project for the February workshop aimed at playing around with Kotlin basics by building a Wordle clone step by step.
 
+## Branch Protection
+
+This repository has branch protection for the `main` branch to prevent direct pushes. All changes must go through pull requests.
+
+### GitHub Branch Protection Setup
+
+To configure branch protection rules on GitHub (requires admin access):
+
+1. Go to the repository Settings → Branches
+2. Click "Add branch protection rule" or edit the existing rule for `main`
+3. Configure the following settings:
+   - **Branch name pattern**: `main`
+   - ✅ **Require a pull request before merging**
+   - ✅ **Require approvals** (recommended: at least 1)
+   - ✅ **Dismiss stale pull request approvals when new commits are pushed**
+   - ✅ **Require status checks to pass before merging**
+   - ✅ **Require branches to be up to date before merging**
+   - ✅ **Include administrators** (optional, enforces rules for admins too)
+4. Click "Save changes"
+
+### Workflow Protection
+
+A GitHub Actions workflow (`protect_main_branch.yml`) provides an additional layer of protection by failing if direct pushes to main are detected.
+
 ## Getting Started
 
 ### Prerequisites
