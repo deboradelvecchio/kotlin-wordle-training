@@ -1,0 +1,16 @@
+name: (CI) Submit Maven Dependencies
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/pom.xml'
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  submit_maven_dependencies:
+    name: Submit Maven Dependencies
+    uses: doctolib/doctoboot-archetype/.github/workflows/rw_gp_back_submit_maven_dependencies.yml@12121abd8fbfe227d306c8adc051cf7bb438f9b1 # cicdgp-v1.4.0

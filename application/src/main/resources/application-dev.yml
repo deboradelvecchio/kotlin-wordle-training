@@ -1,0 +1,37 @@
+spring:
+  config:
+    import:
+      - "classpath:/database-dev.yml"
+
+keymock:
+  http.port: 8880
+
+# Doctoboot
+doctoboot:
+  authentication:
+    enabled: true
+    trusted-issuers:
+      - issuer: http://localhost:${keymock.http.port}/realms/doctolib-pro
+        jwks_uri: http://localhost:${keymock.http.port}/realms/doctolib-pro/protocol/openid-connect/certs
+      - issuer: http://localhost:${keymock.http.port}/realms/doctolib-patient
+        jwks_uri: http://localhost:${keymock.http.port}/realms/doctolib-patient/protocol/openid-connect/certs
+    accepted-clock-skew: 60s
+  local-test:
+    token-generator.enabled: true
+    jwks.enabled: true
+  database:
+    migration.enabled: false
+
+
+interservice:
+  name: kotlin-wordle-training-test
+  # V2 cognito secret-less configuration
+  runtime.name: kotlin-wordle-training-test
+  servers:
+    enabled: true
+  # V1 legacy configuration
+  server:
+    kotlin-wordle-training-test.config: '{"local_name": "kotlin-wordle-training-test", "service_name": "kotlin-wordle-training-test", "algorithm": "HS256", "clients": { "external-client": "test-secret"}}'
+  client:
+    test-ctx-propagation.config: '{"local_name": "external-client", "target_service": "external",  "algorithm": "HS256", "secret": "test-secret"}'
+

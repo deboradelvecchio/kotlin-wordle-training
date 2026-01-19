@@ -1,0 +1,52 @@
+
+body {
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    background-color: #0362AF;
+    color: #fff;
+}
+.starter-template {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.result{
+    padding: 3rem 1.5rem;
+    margin: 0 5rem;
+    border: 1px solid rgba(132, 255, 249, 0.43);
+}
+
+
+h1{
+    color: #fff;
+}
+
+span{
+    color: #d6f2ff;
+}
+
+.errorBox{
+    background-color: #ffc3c3;
+    border: 1px solid #ee2222;
+    padding: 5px 10px;
+    font-weight: bold;
+    color: #fff;
+}
+
+code {
+    font-size: 0.9em;
+    font-family: monospace;
+    color: #00f7ff;
+}
+
+/* CSS for a footer centered with small text */
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #ffffff;
+    text-align: center;
+    font-size: 1.2em;
+    padding: 4em 2em;
+}

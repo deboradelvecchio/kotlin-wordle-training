@@ -1,0 +1,24 @@
+server:
+  port: 8080
+  shutdown: graceful
+  servlet:
+    context-path: /kotlin-wordle-training
+
+spring:
+  application.name: kotlin-wordle-training
+  main:
+    allow-bean-definition-overriding: false
+  liquibase:
+    change-log: classpath:db/db-changelog.xml
+
+# Actuators
+management:
+  endpoints.web.exposure.include: configprops,env,health,info,logfile,loggers,metrics,prometheus
+  endpoint.health.show-details: always
+
+doctoboot:
+  feature.switches.enabled: false
+  authentication.enabled: false
+  # enforce endpoints authorization (through Pre/PostAuthorize annotations)
+  security.authorization.enforcement.throw: true
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.doctolib.kotlinwordletraining</groupId>
+        <artifactId>root</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>infrastructure</artifactId>
+    <name>kotlin-wordle-training spi adapters</name>
+    <description>kotlin-wordle-training spi adapters</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.doctolib</groupId>
+            <artifactId>doctoboot-database</artifactId>
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Language support -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+
+        <!-- Tests -->
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!-- verify database migrations -->
+                <groupId>io.github.liquibase-linter</groupId>
+                <artifactId>liquibase-linter-maven-plugin</artifactId>
+                <configuration>
+                    <changeLogFile>src/main/resources/db/db-changelog.xml</changeLogFile>
+                    <configurationFile>classpath:lqlint.json</configurationFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.doctolib</groupId>
+                <artifactId>doctoboot-taxonomy-maven-plugin</artifactId>
+                <configuration>
+                    <cluster>kotlin-wordle-training</cluster>
+                    <db>kotlin-wordle-training</db>
+                    <packages>
+                        <package>
+                            <owner>modus</owner>
+                            <base>com.doctolib.kotlinwordletraining</base>
+                        </package>
+                    </packages>
+                </configuration>
+            </plugin>
+        </plugins>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+    </build>
+</project>

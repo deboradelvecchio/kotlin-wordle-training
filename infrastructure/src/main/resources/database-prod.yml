@@ -1,0 +1,11 @@
+---
+spring:
+  datasource:
+    url: jdbc:aws-wrapper:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:kotlin-wordle-training}
+    driver-class-name: software.amazon.jdbc.Driver
+    hikari:
+      data-source-properties:
+        wrapperPlugins: iam,failover,efm2
+        iamExpiration: 600
+      exception-override-class-name: software.amazon.jdbc.util.HikariCPSQLException
+      max-lifetime: 1260000
