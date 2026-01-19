@@ -29,7 +29,15 @@ brew install openjdk@21
 brew install kotlin@2.0.0
 ```
 
-##### 7 - First Build
+##### 7 - Setup Git Hooks
+
+Configure git to use the project's git hooks (for automatic code formatting):
+
+```shell
+git config core.hooksPath scripts/git-hooks
+```
+
+##### 8 - First Build
 
 Ensure you have the latest maven settings for your workstation:
 
