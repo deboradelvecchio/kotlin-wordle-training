@@ -21,8 +21,9 @@ jobs:
           
           # Check commit message for merge patterns
           COMMIT_MSG=$(git log -1 --pretty=%B HEAD)
+          FIRST_LINE=$(echo "$COMMIT_MSG" | head -n 1)
           IS_MERGE_MSG=$(echo "$COMMIT_MSG" | grep -iE '^Merge pull request|^Merge branch' || echo "")
-          IS_SQUASH_MERGE=$(echo "$COMMIT_MSG" | grep -E '\(#[0-9]+\)' || echo "")
+          IS_SQUASH_MERGE=$(echo "$FIRST_LINE" | grep -E '\(#[0-9]+\)$' || echo "")
           
           # Allow if it's a merge commit or if commit message indicates a merge/squash merge
           if [ "$PARENT_COUNT" -ge 2 ] || [ -n "$IS_MERGE_MSG" ] || [ -n "$IS_SQUASH_MERGE" ]; then
@@ -32,8 +33,8 @@ jobs:
           
           # Check if the actor is a known bot or service account
           ACTOR="${{ github.actor }}"
-          if [[ "$ACTOR" == *"[bot]"* ]] || [[ "$ACTOR" == *"-bot" ]] || [[ "$ACTOR" == *"bot" ]] || \
-             [[ "$ACTOR" == "github-actions"* ]] || [[ "$ACTOR" == "dependabot"* ]]; then
+          if [[ "$ACTOR" == *"[bot]"* ]] || [[ "$ACTOR" == *"-bot" ]] || [[ "$ACTOR" == *"_bot" ]] || \
+             [[ "$ACTOR" == "github-actions"* ]] || [[ "$ACTOR" == "dependabot"* ]] || [[ "$ACTOR" == "renovate"* ]]; then
             echo "✅ Push is from an automated service account: $ACTOR"
             exit 0
           fi
