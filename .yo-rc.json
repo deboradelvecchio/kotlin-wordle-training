@@ -1,0 +1,17 @@
+{
+  "@doctolib/generator-doctoboot": {
+    "teamName": "modus",
+    "githubSlug": "kotlin-wordle-training",
+    "appName": "kotlin-wordle-training",
+    "packageName": "com.doctolib.kotlinwordletraining",
+    "language": "kotlin",
+    "databaseType": "postgresql",
+    "interserviceController": false,
+    "interserviceClient": false,
+    "packageFolder": "com/doctolib/kotlinwordletraining",
+    "buildTool": "maven",
+    "appDescr": "kotlin wordle training",
+    "features": [],
+    "langExt": "kt"
+  }
+}

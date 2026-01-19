@@ -1,0 +1,8 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>doctolib/renovate-config", ":automergeMinor"],
+  "branchPrefix": "renovate-",
+  "prHourlyLimit": 3,
+  "prConcurrentLimit": 100,
+  "rebaseWhen": "conflicted"
+}

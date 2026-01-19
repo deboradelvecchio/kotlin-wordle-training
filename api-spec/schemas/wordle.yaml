@@ -1,0 +1,224 @@
+# Wordle game schemas
+
+LetterFeedback:
+  type: object
+  properties:
+    letter:
+      type: string
+      minLength: 1
+      maxLength: 1
+      example: "A"
+    status:
+      type: string
+      enum: [correct, present, absent]
+      description: |
+        - correct: letter is in the correct position
+        - present: letter is in the word but wrong position
+        - absent: letter is not in the word
+      example: "correct"
+  required:
+    - letter
+    - status
+
+Attempt:
+  type: object
+  properties:
+    word:
+      type: string
+      minLength: 5
+      maxLength: 5
+      example: "HELLO"
+    feedback:
+      type: array
+      items:
+        $ref: '#/LetterFeedback'
+      minItems: 5
+      maxItems: 5
+    attemptNumber:
+      type: integer
+      minimum: 1
+      maximum: 6
+      example: 1
+  required:
+    - word
+    - feedback
+    - attemptNumber
+
+GameState:
+  type: string
+  enum: [not_started, in_progress, won, lost]
+  description: |
+    - not_started: game hasn't started yet
+    - in_progress: game is ongoing
+    - won: game was won
+    - lost: game was lost (6 attempts used)
+
+WordOfTheDayResponse:
+  type: object
+  properties:
+    word:
+      type: string
+      minLength: 5
+      maxLength: 5
+      description: The word of the day (always returned)
+      example: "HELLO"
+    date:
+      type: string
+      format: date
+      description: ISO date string for the word of the day
+      example: "2026-01-19"
+    attempts:
+      type: array
+      items:
+        $ref: '#/Attempt'
+      description: Previous attempts (only if authenticated)
+    gameState:
+      $ref: '#/GameState'
+      description: Current game state (only if authenticated)
+  required:
+    - word
+    - date
+
+AttemptRequest:
+  type: object
+  properties:
+    word:
+      type: string
+      minLength: 5
+      maxLength: 5
+      description: The word to attempt
+      example: "HELLO"
+  required:
+    - word
+
+AttemptResponse:
+  type: object
+  properties:
+    word:
+      type: string
+      minLength: 5
+      maxLength: 5
+      description: The word that was attempted
+      example: "HELLO"
+    feedback:
+      type: array
+      items:
+        $ref: '#/LetterFeedback'
+      minItems: 5
+      maxItems: 5
+      description: Feedback for each letter
+    isCorrect:
+      type: boolean
+      description: Whether the word is correct
+      example: false
+    gameState:
+      $ref: '#/GameState'
+      description: Updated game state after this attempt
+    attemptsRemaining:
+      type: integer
+      minimum: 0
+      maximum: 6
+      description: Number of attempts remaining
+      example: 5
+    solvedWord:
+      type: string
+      minLength: 5
+      maxLength: 5
+      description: The solved word (only returned if game is won and user is authenticated)
+      example: "HELLO"
+    attempts:
+      type: array
+      items:
+        $ref: '#/Attempt'
+      description: |
+        Complete attempts array (only returned if user is authenticated).
+        Included to avoid an extra API call - frontend can update cache directly.
+  required:
+    - word
+    - feedback
+    - isCorrect
+    - gameState
+    - attemptsRemaining
+
+GameStateResponse:
+  type: object
+  properties:
+    gameState:
+      $ref: '#/GameState'
+    attempts:
+      type: array
+      items:
+        $ref: '#/Attempt'
+    word:
+      type: string
+      minLength: 5
+      maxLength: 5
+      description: The word of the day
+    date:
+      type: string
+      format: date
+      description: ISO date string for the word of the day
+  required:
+    - gameState
+    - attempts
+    - word
+    - date
+
+LeaderboardEntry:
+  type: object
+  properties:
+    username:
+      type: string
+      example: "player123"
+    attempts:
+      type: integer
+      minimum: 1
+      maximum: 6
+      description: Number of attempts used to solve
+      example: 3
+    solveTimeSeconds:
+      type: integer
+      minimum: 0
+      description: Time taken to solve in seconds
+      example: 45
+    rank:
+      type: integer
+      minimum: 1
+      description: Rank in the leaderboard
+      example: 1
+  required:
+    - username
+    - attempts
+    - solveTimeSeconds
+    - rank
+
+LeaderboardResponse:
+  type: object
+  properties:
+    entries:
+      type: array
+      items:
+        $ref: '#/LeaderboardEntry'
+      description: Top players in the leaderboard
+    currentUserRank:
+      type: integer
+      minimum: 1
+      description: Current user's rank (only if authenticated)
+  required:
+    - entries
+
+SaveGameStateRequest:
+  type: object
+  properties:
+    attempts:
+      type: array
+      items:
+        $ref: '#/Attempt'
+      description: All attempts made so far
+    date:
+      type: string
+      format: date
+      description: ISO date string for the word of the day
+  required:
+    - attempts
+    - date

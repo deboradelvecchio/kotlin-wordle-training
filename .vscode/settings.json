@@ -1,0 +1,55 @@
+{
+  // Automatic formatting on save for Kotlin using ktfmt (via Spotless)
+  "[kotlin]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "fwcd.kotlin"
+  },
+  
+  // Kotlin extension configuration
+  "kotlin.languageServer.enabled": true,
+  "kotlin.formatter": {
+    "style": "KOTLINLANG"
+  },
+  "kotlin.languageServer.transport": "stdio",
+  "kotlin.compiler.jvm.target": "21",
+  
+  // Prettier for frontend (TypeScript/React)
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  
+  // Note: To use ktfmt exactly as Spotless, use the "Spotless: Apply formatting" task
+  // or run manually: ./mvnw spotless:apply
+  
+  // File watcher exclusions
+  "files.watcherExclude": {
+    "**/target/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/generated/**": true
+  },
+  
+  // OpenAPI file association for better syntax highlighting
+  "files.associations": {
+    "openapi.yaml": "yaml",
+    "openapi.yml": "yaml"
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
+}

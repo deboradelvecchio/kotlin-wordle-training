@@ -1,0 +1,17 @@
+site_name: kotlin wordle training
+site_description: kotlin wordle training Technical Documentation
+site_author: modus
+repo_url: https://github.com/doctolib/kotlin-wordle-training
+edit_uri: ''
+copyright: Doctolib
+site_url: ${MKDOCS_SITE_URL}
+docs_dir: doc
+nav:
+  - Home: index.md
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+plugins:
+  - techdocs-core

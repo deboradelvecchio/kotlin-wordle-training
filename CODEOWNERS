@@ -1,0 +1,5 @@
+* @doctolib/modus
+Dockerfile @doctolib/modus @doctolib/deployment
+docker-compose.yml @doctolib/modus @doctolib/deployment
+.github @doctolib/modus @doctolib/deployment
+pom.xml @doctolib/modus @doctolib/deployment

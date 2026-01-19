@@ -1,0 +1,18 @@
+# This is just an example. Production configuration shall be configured via environment variables
+doctoboot:
+  authentication:
+    enabled: true
+    trusted-issuers:
+    - issuer: ${KEYCLOAK_PRO_ISSUER}
+      jwks_uri: ${KEYCLOAK_PRO_JWKS_URI}
+    - issuer: ${KEYCLOAK_PATIENT_ISSUER}
+      jwks_uri: ${KEYCLOAK_PATIENT_JWKS_URI}
+
+# dogstatsd only for staging/production
+management:
+  statsd:
+    metrics:
+      export.enabled: true
+  endpoint:
+    prometheus.enabled: false
+

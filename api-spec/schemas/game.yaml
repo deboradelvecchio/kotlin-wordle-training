@@ -1,0 +1,21 @@
+# Game-related schemas
+# TODO: Add your game schemas here
+# Example:
+# Game:
+#   type: object
+#   properties:
+#     id:
+#       type: string
+#       format: uuid
+#     word:
+#       type: string
+#       minLength: 5
+#       maxLength: 5
+#     attempts:
+#       type: integer
+#       minimum: 0
+#       maximum: 6
+#   required:
+#     - id
+#     - word
+#     - attempts

@@ -1,0 +1,10 @@
+FROM maven:3.9-eclipse-temurin-21
+
+WORKDIR /workspace
+
+# Expose port
+EXPOSE 8080
+
+# Override entrypoint to use bash directly
+ENTRYPOINT []
+CMD ["bash", "-c", "chmod +x ./mvnw 2>/dev/null || true && ./mvnw -am -pl application spring-boot:run -Dspring-boot.run.profiles=dev"]

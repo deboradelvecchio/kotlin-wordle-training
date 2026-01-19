@@ -1,0 +1,36 @@
+doctoboot:
+  authentication:
+    enabled: true
+    accepted-clock-skew: PT30S
+    # please do not change the jwks-uri "localhost:9876" part,
+    # because it is expected by the class DoctobootJwtTestSupport
+    trusted-issuers:
+      - issuer: ${TEST_AUTH_ISSUER}
+        jwks-uri: http://localhost:9876/jwks
+  context:
+    enabled: true
+  local-test:
+    token-generator.enabled: true
+
+interservice:
+  name: kotlin-wordle-training-test
+  # V2 interservice: Cognito IDP
+  runtime.name: kotlin-wordle-training-test
+  servers:
+    enabled: true
+    accepted-clock-skew: PT30S
+    # please do not change the jwks-uri "localhost:9876" part,
+    # because it is expected by the class DoctobootJwtTestSupport
+    trusted-issuers:
+      - issuer: ${TEST_COGNITO_ISSUER}
+        jwks-uri: http://localhost:9876/jwks-cognito
+  # V1 legacy configuration
+  server:
+    kotlin-wordle-training-test.config: '{"local_name": "kotlin-wordle-training-test", "service_name": "kotlin-wordle-training-test", "algorithm": "HS256", "clients": { "external-client": "test-secret"}}'
+  client:
+    test-ctx-propagation.config: '{"local_name": "external-client", "target_service": "external",  "algorithm": "HS256", "secret": "test-secret"}'
+
+
+logging:
+  level:
+    com.doctolib: DEBUG

@@ -1,0 +1,13 @@
+name: (CD) Generate and Export Data Taxonomy
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  generate_and_export_data_taxonomy:
+    name: Generate and Export Data Taxonomy
+    uses: doctolib/doctoboot-archetype/.github/workflows/rw_gp_back_generate_and_export_data_taxonomy.yml@bb5e2b7335bb1018e83a58e0edc5f864b0d01381 # cicdgp-v1.1.0
+    with:
+      cluster_name: kotlin-wordle-training
+      db_name: kotlin-wordle-training

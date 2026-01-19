@@ -1,0 +1,15 @@
+name: (CI) Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test
+    uses: doctolib/doctoboot-archetype/.github/workflows/rw_gp_back_test.yml@12121abd8fbfe227d306c8adc051cf7bb438f9b1 # cicdgp-v1.4.0
+    with:
+      generate_test_metrics: true

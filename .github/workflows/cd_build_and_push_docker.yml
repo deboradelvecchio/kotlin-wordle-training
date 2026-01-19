@@ -1,0 +1,17 @@
+name: (CD) Build and Push Docker
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build_and_push_docker:
+    name: Build and Push Docker
+    uses: doctolib/doctoboot-archetype/.github/workflows/rw_gp_back_build_and_push_docker.yml@12121abd8fbfe227d306c8adc051cf7bb438f9b1 # cicdgp-v1.4.0
+    with:
+      docker_image_name: kotlin-wordle-training
+      push_docker_image: false # Just remove this line to enable docker image push
+      post_jar_build_script: |
+        mkdir -p layers
+        java -Djarmode=tools -jar application/target/application.jar extract --layers --destination layers/application
+        java -Djarmode=tools -jar migrator/target/migrator.jar extract --layers --destination layers/migrator

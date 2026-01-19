@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "fwcd.kotlin",
+    "mathiasfrohlich.kotlin",
+    "esbenp.prettier-vscode",
+    "redhat.vscode-yaml"
+  ]
+}

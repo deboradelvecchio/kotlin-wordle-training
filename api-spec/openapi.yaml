@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: Wordle Training API
+  version: 1.0.0
+  description: API for the Wordle training workshop
+
+servers:
+  - url: http://localhost:8080/kotlin-wordle-training/api
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: health
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /word-of-the-day:
+    get:
+      summary: Get the word of the day
+      description: |
+        Returns the word of the day and optionally game state.
+        - If not authenticated: returns only word and date
+        - If authenticated: returns word, date, attempts, and game state
+      operationId: getWordOfTheDay
+      tags:
+        - Wordle
+      responses:
+        '200':
+          description: Word of the day information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WordOfTheDayResponse'
+
+  /attempt:
+    post:
+      summary: Submit a word attempt
+      description: |
+        Validates the word and returns feedback for each letter.
+        - Validates word exists in dictionary
+        - Returns feedback (correct/present/absent) for each letter
+        - If authenticated and game is won: returns the solved word
+        - If not authenticated: word validation only, no solved word returned
+      operationId: attemptWord
+      tags:
+        - Wordle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttemptRequest'
+      responses:
+        '200':
+          description: Attempt feedback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResponse'
+        '400':
+          description: Invalid word (not 5 letters or not in dictionary)
+        '422':
+          description: Game already finished or no attempts remaining
+
+  /game-state:
+    get:
+      summary: Get current game state
+      description: |
+        Returns the current game state with all attempts made so far.
+        Requires authentication.
+      operationId: getGameState
+      tags:
+        - Wordle
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current game state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStateResponse'
+        '401':
+          description: Unauthorized (authentication required)
+
+    post:
+      summary: Save game state
+      description: |
+        Saves the game state from localStorage when user logs in.
+        Transfers attempts from anonymous play to authenticated user.
+        Requires authentication.
+      operationId: saveGameState
+      tags:
+        - Wordle
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveGameStateRequest'
+      responses:
+        '200':
+          description: Game state saved successfully
+        '401':
+          description: Unauthorized (authentication required)
+
+  /leaderboard:
+    get:
+      summary: Get leaderboard
+      description: |
+        Returns the leaderboard with top players.
+        Shows attempts and solve time for ranking.
+        Requires authentication.
+      operationId: getLeaderboard
+      tags:
+        - Wordle
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardResponse'
+        '401':
+          description: Unauthorized (authentication required)
+
+  /auth/login:
+    get:
+      summary: Initiate OAuth2 login flow
+      description: |
+        Redirects to DoctoBoot OAuth2 provider for authentication.
+        After successful login, user is redirected back to the application.
+      operationId: login
+      tags:
+        - Authentication
+      responses:
+        '302':
+          description: Redirect to OAuth2 provider
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: DoctoBoot OAuth2 JWT token
+
+  schemas:
+    # Health schemas - referenced from external file
+    HealthResponse:
+      $ref: './schemas/health.yaml#/HealthResponse'
+    
+    # Wordle schemas - referenced from external file
+    LetterFeedback:
+      $ref: './schemas/wordle.yaml#/LetterFeedback'
+    Attempt:
+      $ref: './schemas/wordle.yaml#/Attempt'
+    GameState:
+      $ref: './schemas/wordle.yaml#/GameState'
+    WordOfTheDayResponse:
+      $ref: './schemas/wordle.yaml#/WordOfTheDayResponse'
+    AttemptRequest:
+      $ref: './schemas/wordle.yaml#/AttemptRequest'
+    AttemptResponse:
+      $ref: './schemas/wordle.yaml#/AttemptResponse'
+    GameStateResponse:
+      $ref: './schemas/wordle.yaml#/GameStateResponse'
+    LeaderboardEntry:
+      $ref: './schemas/wordle.yaml#/LeaderboardEntry'
+    LeaderboardResponse:
+      $ref: './schemas/wordle.yaml#/LeaderboardResponse'
+    SaveGameStateRequest:
+      $ref: './schemas/wordle.yaml#/SaveGameStateRequest'

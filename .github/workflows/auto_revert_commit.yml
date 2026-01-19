@@ -1,0 +1,28 @@
+name: '(Auto) Revert commit'
+run-name: 'Revert ${{ inputs.commit_sha }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to revert the commit on'
+        required: false
+        default: 'main'
+      commit_sha:
+        description: 'Commit SHA to revert on target branch'
+        required: true
+        default: ''
+      reason:
+        description: 'Reason for reverting the commit'
+        required: true
+        default: ''
+
+jobs:
+  revert_commit:
+    name: Revert commit
+    uses: doctolib/actions/.github/workflows/rw_revert_commit.yml@main
+    with:
+      commit_sha: ${{ inputs.commit_sha }}
+      reason: ${{ inputs.reason }}
+      branch: ${{ inputs.branch }}
+      # slack_channel: <YOUR_SLACK_CHANNEL> # Optional: specify a Slack channel to send revert notifications to
