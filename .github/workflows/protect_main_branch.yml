@@ -17,7 +17,7 @@ jobs:
       - name: Check if push is from a pull request merge
         run: |
           # Check if this is a merge commit (has multiple parents)
-          PARENT_COUNT=$(git cat-file -p HEAD | grep '^parent ' | wc -l)
+          PARENT_COUNT=$(git rev-list --count HEAD^@ 2>/dev/null || echo "0")
           
           # Check commit message for merge patterns
           COMMIT_MSG=$(git log -1 --pretty=%B HEAD)
