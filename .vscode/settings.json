@@ -1,0 +1,16 @@
+{
+  // Automatic formatting on save for Kotlin using ktfmt (via Spotless)
+  "[kotlin]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "fwcd.kotlin"
+  },
+
+  // Kotlin extension configuration
+  "kotlin.languageServer.enabled": true,
+  "kotlin.formatter": {
+    "style": "KOTLINLANG"
+  },
+
+  // Note: To use ktfmt exactly as Spotless, use the "Spotless: Apply formatting" task
+  // or run manually: ./mvnw spotless:apply
+}

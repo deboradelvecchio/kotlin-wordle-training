@@ -30,7 +30,7 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+# .vscode/ - Keep VSCode settings in repo for team consistency
 
 ### Misc ###
 *.log

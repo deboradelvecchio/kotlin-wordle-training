@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Pre-commit hook to run Spotless formatting
+#
+
+echo "Running Spotless formatting..."
+
+# Run spotless:apply to format code
+./mvnw spotless:apply
+
+# Stage any formatting changes automatically
+if ! git diff --quiet; then
+    echo "Staging formatted files..."
+    git add -u
+fi
+
+echo "✅ Code is properly formatted!"
+exit 0
