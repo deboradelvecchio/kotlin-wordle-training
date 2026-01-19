@@ -4,13 +4,31 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "fwcd.kotlin"
   },
-
+  
   // Kotlin extension configuration
   "kotlin.languageServer.enabled": true,
   "kotlin.formatter": {
     "style": "KOTLINLANG"
   },
-
+  
+  // Prettier for frontend (TypeScript/React)
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  
   // Note: To use ktfmt exactly as Spotless, use the "Spotless: Apply formatting" task
   // or run manually: ./mvnw spotless:apply
 }
