@@ -92,23 +92,25 @@ Implement the base Wordle game functionality with persistence and authentication
 **Branch:** `phase-1-database-migrations`
 
 - [ ] Create JPA entities:
-  - `WordOfTheDay` (id, word, date, created_at)
-  - `GameAttempt` (id, user_id, word_of_the_day_id, word, attempt_number, feedback, created_at)
-  - `GameState` (id, user_id, word_of_the_day_id, state, attempts_count, solved_at, started_at)
+  - `Word` (id, word, created_at)
+    - `created_at`: timestamp when this word was generated
+  - `GameAttempt` (id, user_id, word_id, word, attempt_number, feedback, created_at)
+  - `GameState` (id, user_id, word_id, state, attempts_count, solved_at, started_at)
 - [ ] Create Liquibase migrations for tables
 - [ ] Configure JPA relationships:
   - `User` -> `GameState` (OneToMany)
   - `User` -> `GameAttempt` (OneToMany)
-  - `WordOfTheDay` -> `GameState` (OneToMany)
-  - `WordOfTheDay` -> `GameAttempt` (OneToMany)
+  - `Word` -> `GameState` (OneToMany)
+  - `Word` -> `GameAttempt` (OneToMany)
 
 **Note on Timestamps:**
 - `created_at` on `GameAttempt`: when attempt was made
 - `started_at` on `GameState`: when first attempt was made
 - `solved_at` on `GameState`: when game was won (null if not won)
+- `created_at` on `Word`: when this word was generated (most recent = current valid word)
 
 **Files:**
-- `application/src/main/kotlin/.../model/WordOfTheDay.kt`
+- `application/src/main/kotlin/.../model/Word.kt`
 - `application/src/main/kotlin/.../model/GameAttempt.kt`
 - `application/src/main/kotlin/.../model/GameState.kt`
 - `infrastructure/src/main/resources/db/migrations/02-create-wordle-tables.xml`
@@ -121,15 +123,16 @@ Implement the base Wordle game functionality with persistence and authentication
 - [ ] Create `WordFetcherService`:
   - Call `https://random-word-api.herokuapp.com/word?length=5`
   - Handle errors and retry logic
-  - Store fetched word in database with date
-- [ ] Implement word of the day caching:
-  - Same word for everyone on the same day
+  - Store fetched word in database with `created_at` timestamp
+- [ ] Implement word caching logic:
   - Check if word exists for today before fetching
-  - Return existing word if available
+  - Return existing word if available for today
+  - Same word for everyone on the same day
+  - **Note:** The word is stored server-side only and never sent to clients
 
 **Files:**
 - `application/src/main/kotlin/.../service/WordFetcherService.kt`
-- `application/src/main/kotlin/.../repository/WordOfTheDayRepository.kt`
+- `application/src/main/kotlin/.../repository/WordRepository.kt` 
 
 ---
 
@@ -162,17 +165,14 @@ Implement the base Wordle game functionality with persistence and authentication
 **Branch:** `phase-1-controllers`
 
 - [ ] Create `WordleController` with endpoints:
-  - `GET /api/word-of-the-day`:
-    - Returns word of the day and date
-    - If authenticated: includes attempts and game state
-    - If not authenticated: only word and date
   - `POST /api/attempt`:
     - Validates word
     - Calculates feedback
     - If authenticated: saves attempt, updates game state
     - Returns feedback and updated state
   - `GET /api/game-state` (requires auth):
-    - Returns complete game state
+    - Returns complete game state (date, attempts, game state)
+    - Does NOT return the word itself for security
   - `POST /api/game-state` (requires auth):
     - Saves state from localStorage when user logs in
 - [ ] Create `AuthController`:
@@ -180,6 +180,7 @@ Implement the base Wordle game functionality with persistence and authentication
 - [ ] Implement saving attempts and statistics:
   - Save each attempt with user ID, word, feedback, attempt number, timestamp
   - Update game state (state, attempts_count, timestamps)
+- [ ] **Security Note:** The word is never returned to the client in any endpoint - it's only used server-side to validate attempts
 
 **Files:**
 - `application/src/main/kotlin/.../controller/WordleController.kt`
@@ -266,11 +267,11 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 - [ ] Create `@Scheduled` job that:
   - Runs every 3 hours
   - Calls external API for new word
-  - Saves new word in database
+  - Saves new word in database with `created_at` timestamp
   - Publishes Kafka event `NEW_WORD_OF_THE_DAY` (if Kafka is set up)
   - Sends SSE notification (if SSE is set up)
 - [ ] Configure Spring Scheduling
-- [ ] Handle edge cases (word already exists for that date/time)
+- [ ] Handle edge cases (check if word was already created recently)
 
 **Files:**
 - `application/src/main/kotlin/.../scheduler/WordOfTheDayScheduler.kt`
@@ -358,7 +359,9 @@ Contains all Phase 3 components combined:
 ### Decisions Made
 
 1. **Word API**: Uses `https://random-word-api.herokuapp.com/word?length=5` (5-letter words)
-2. **Word of the Day**: Same word for all users on the same day
+2. **Word Management**: 
+   - Database uses `Word` entity with `created_at` timestamp
+   - Initially, implementations use "word of the day" logic (one word per day, filtering by date)
 3. **User Management**:
    - User entity stored in database with `external_id` from JWT `sub` claim
    - First login creates user automatically (find-or-create pattern)
