@@ -7,4 +7,4 @@ EXPOSE 8080
 
 # Override entrypoint to use bash directly
 ENTRYPOINT []
-CMD ["bash", "-c", "chmod +x ./mvnw 2>/dev/null || true && ./mvnw -am -pl application spring-boot:run -Dspring-boot.run.profiles=dev"]
+CMD ["bash", "-c", "chmod +x ./mvnw 2>/dev/null || true && ./mvnw clean install -DskipTests -pl application -am && ./mvnw spring-boot:run -pl application -Dspring-boot.run.profiles=dev"]
