@@ -34,4 +34,3 @@ interservice:
     kotlin-wordle-training-test.config: '{"local_name": "kotlin-wordle-training-test", "service_name": "kotlin-wordle-training-test", "algorithm": "HS256", "clients": { "external-client": "${INTERSERVICE_SECRET:test-secret}"}}'
   client:
     test-ctx-propagation.config: '{"local_name": "external-client", "target_service": "external",  "algorithm": "HS256", "secret": "${INTERSERVICE_SECRET:test-secret}"}'
-

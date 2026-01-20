@@ -3,9 +3,12 @@ import { Keyboard } from '@components/Keyboard'
 import { GameHeader } from '@components/GameHeader'
 import { GameResult } from '@components/GameResult'
 import { useWordleGame } from '@hooks/ui/useWordleGame'
+import { useWordOfTheDayNotifications } from '@hooks/ui/useWordOfTheDayNotifications'
 import { isGameFinished } from '@utils/gameState'
 
 export function Game() {
+  // Listen for Server-Sent Events notifications about new words of the day
+  useWordOfTheDayNotifications()
   const {
     wordOfTheDay,
     attempts,
