@@ -2,6 +2,31 @@
 
 This document describes the workshop phases and corresponding branches. Each component is in its own branch, allowing you to pick and choose what to include.
 
+## Table of Contents
+
+- [Branch Structure](#branch-structure)
+- [Phase 1: Base Game Functionality](#phase-1-base-game-functionality)
+  - [1. User Entity and Repository](#1-user-entity-and-repository)
+  - [2. Database Migrations (Game Entities)](#2-database-migrations-game-entities)
+  - [3. Word Fetcher Service](#3-word-fetcher-service)
+  - [4. Word Verification Algorithm](#4-word-verification-algorithm)
+  - [5. API Controllers](#5-api-controllers)
+  - [6. Complete Phase 1](#6-complete-phase-1)
+- [Phase 2: Leaderboard](#phase-2-leaderboard)
+  - [1. Ranking Algorithm](#1-ranking-algorithm)
+  - [2. Leaderboard Endpoint](#2-leaderboard-endpoint)
+  - [3. Complete Phase 2](#3-complete-phase-2)
+- [Phase 3: Scheduled Jobs, Kafka Events, and SSE](#phase-3-scheduled-jobs-kafka-events-and-sse)
+  - [1. Scheduled Jobs](#1-scheduled-jobs)
+  - [2. Kafka Setup](#2-kafka-setup)
+  - [3. Server-Sent Events (SSE) Endpoint](#3-server-sent-events-sse-endpoint)
+  - [4. Daily Leaderboard Aggregation (Optional)](#4-daily-leaderboard-aggregation-optional---for-participants)
+  - [5. Complete Phase 3](#5-complete-phase-3)
+- [Technical Notes](#technical-notes)
+  - [Decisions Made](#decisions-made)
+  - [Branch Usage Strategy](#branch-usage-strategy)
+  - [SSE Implementation Details](#sse-implementation-details)
+
 ## Branch Structure
 
 Each component/sub-phase has its own branch, allowing maximum flexibility in what to include.
