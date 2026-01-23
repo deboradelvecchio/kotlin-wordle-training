@@ -169,30 +169,9 @@ The OpenAPI specification in `api-spec/` serves as documentation and reference, 
 
 The following endpoints need to be implemented in the backend. All specifications are in `api-spec/openapi.yaml`.
 
-#### 1. `GET /api/word-of-the-day`
+**📖 For detailed implementation phases and branch structure, see [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md)**
 
-**Status:** ❌ Not implemented
-
-**Requirements:**
-- Returns the word of the day (5-letter word)
-- Returns current date (ISO format)
-- **If user is authenticated:**
-- Include `attempts` array (all previous attempts)
-- Include `gameState` (not_started, in_progress, won, lost)
-- **If user is NOT authenticated:**
-- Return only `word` and `date`
-- Do not include `attempts` or `gameState`
-
-**Response Schema:** `WordOfTheDayResponse`
-
-**Notes:**
-- Word should be the same for all users on the same day
-- Word should change daily (based on date)
-- For authenticated users, load attempts from database
-
----
-
-#### 2. `POST /api/attempt`
+#### 1. `POST /api/attempt`
 
 **Status:** ❌ Not implemented
 
@@ -200,18 +179,18 @@ The following endpoints need to be implemented in the backend. All specification
 - Accepts `AttemptRequest` with a 5-letter word
 - Validates word exists in dictionary (5 letters, valid word)
 - Calculates feedback for each letter:
-- `correct`: letter is in correct position
-- `present`: letter is in word but wrong position
-- `absent`: letter is not in word
+  - `correct`: letter is in correct position
+  - `present`: letter is in word but wrong position
+  - `absent`: letter is not in word
 - **If authenticated:**
-- Save attempt to database
-- Update game state
-- If game is won: return `solvedWord` in response
-- Return `attempts` array in response (to avoid extra API call)
+  - Save attempt to database
+  - Update game state
+  - If game is won: return `solvedWord` in response
+  - Return `attempts` array in response (to avoid extra API call)
 - **If NOT authenticated:**
-- Only validate word and return feedback
-- Do not save anything
-- Do not return `solvedWord` or `attempts`
+  - Only validate word and return feedback
+  - Do not save anything
+  - Do not return `solvedWord` or `attempts`
 
 **Response Schema:** `AttemptResponse`
 
@@ -219,14 +198,15 @@ The following endpoints need to be implemented in the backend. All specification
 - `400`: Invalid word (not 5 letters or not in dictionary)
 - `422`: Game already finished or no attempts remaining (max 6 attempts)
 
-**Notes:**
+**Security Notes:**
+- The word is never returned to the client - it's only used server-side to validate attempts
 - Word validation logic: check if word exists in a dictionary
-- Feedback calculation: compare attempted word with word of the day
+- Feedback calculation: compare attempted word with current word
 - Game ends when: word is correct (won) or 6 attempts used (lost)
 
 ---
 
-#### 3. `GET /api/game-state`
+#### 2. `GET /api/game-state`
 
 **Status:** ❌ Not implemented
 
@@ -234,17 +214,18 @@ The following endpoints need to be implemented in the backend. All specification
 - **Requires authentication** (returns 401 if not authenticated)
 - Returns current game state for authenticated user
 - Includes all attempts made so far
-- Includes word of the day and date
+- Includes date (but NOT the word itself for security)
 
 **Response Schema:** `GameStateResponse`
 
 **Security:**
 - Must check authentication token
 - Return only current user's game state
+- **Never return the word** - it's only used server-side
 
 ---
 
-#### 4. `POST /api/game-state`
+#### 3. `POST /api/game-state`
 
 **Status:** ❌ Not implemented
 
@@ -253,7 +234,7 @@ The following endpoints need to be implemented in the backend. All specification
 - Accepts `SaveGameStateRequest` with attempts array and date
 - Saves game state from localStorage when user logs in
 - Transfers anonymous attempts to authenticated user
-- Only saves if date matches current word of the day date
+- Only saves if date matches current word date
 
 **Request Schema:** `SaveGameStateRequest`
 
@@ -265,7 +246,7 @@ The following endpoints need to be implemented in the backend. All specification
 
 ---
 
-#### 5. `GET /api/leaderboard`
+#### 4. `GET /api/leaderboard`
 
 **Status:** ❌ Not implemented
 
@@ -309,10 +290,25 @@ The following endpoints need to be implemented in the backend. All specification
 ### Implementation Notes
 
 1. **Word Dictionary**: You'll need a dictionary of valid 5-letter words for validation
-2. **Word of the Day Selection**: Decide how to select the word (deterministic based on date, or random)
-3. **Authentication**: Use DoctoBoot's authentication mechanisms to check if user is authenticated
-4. **Database**: Models and database schema will be discussed separately
-5. **Error Handling**: Return appropriate HTTP status codes and error messages
+2. **Word Selection**: Words are fetched from `https://random-word-api.herokuapp.com/word?length=5`
+3. **Security**: The word is **never** returned to the client - it's only stored server-side and used to validate attempts
+4. **Authentication**: Use DoctoBoot's authentication mechanisms to check if user is authenticated
+5. **Database**: 
+   - User entity with `external_id` from JWT `sub` claim
+   - Word entity with `created_at` timestamp (most recent word is current)
+   - GameState and GameAttempt entities for tracking game progress
+   - See [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md) for detailed schema
+6. **Error Handling**: Return appropriate HTTP status codes and error messages
+
+### Workshop Structure
+
+This project is organized into phases for the workshop. Each phase has its own branch with specific components:
+
+- **Phase 1**: Base game functionality (User entity, Database, Word fetcher, Word verification, Controllers)
+- **Phase 2**: Leaderboard (Ranking algorithm, Leaderboard endpoint)
+- **Phase 3**: Scheduled jobs, Kafka, and SSE (Scheduled word generation, Kafka events, Server-Sent Events)
+
+See [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md) for complete details on branch structure and implementation phases.
 
 ### Useful Links
 

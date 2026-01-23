@@ -69,6 +69,36 @@ Implement the base Wordle game functionality with persistence and authentication
 #### 1. User Entity and Repository
 **Branch:** `phase-1-user-entity`
 
+**Do we need a User entity in the database?**
+
+Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a User table. Here are the options:
+
+**Option A: User Entity (Recommended)**
+- Store user info locally as a cache/reference
+- Fields: `id`, `username`, `email`, `external_id`, `created_at`, `updated_at`
+- `external_id`: from JWT `sub` claim (identifies user across sessions)
+- **Pros:**
+  - Fast queries for leaderboard (username already in DB)
+  - No need to call Keymock/OAuth2 provider for user info
+  - Can add custom fields later (preferences, stats, etc.)
+  - Common pattern: OAuth2 for auth, local DB for application data
+- **Cons:**
+  - Need to sync with OAuth2 provider (username/email might change)
+  - Slight duplication of data
+
+**Option B: No User Entity (Alternative)**
+- Use `external_id` directly in `GameState` and `GameAttempt` tables
+- Extract username/email from JWT token when needed
+- **Pros:**
+  - Simpler schema
+  - No sync needed
+- **Cons:**
+  - Need to decode JWT for every leaderboard query
+  - Username might not be available if token expired
+  - Harder to query by username
+
+**Recommendation:** Use Option A (User entity) for better performance and flexibility.
+
 - [ ] Create JPA entity `User`:
   - Fields: `id`, `username`, `email`, `external_id`, `created_at`, `updated_at`
   - `external_id`: from JWT `sub` claim (identifies user across sessions)
@@ -78,6 +108,13 @@ Implement the base Wordle game functionality with persistence and authentication
   - `findOrCreate(externalId, username, email)`: find or create user
   - `getCurrentUser()`: get user from SecurityContext
 - [ ] Create helper `UserUtils` to extract user from JWT token
+
+**OAuth2 Local Setup:**
+- DoctoBoot provides local OAuth2 authentication using **Keymock** (Keycloak mock)
+- See [KEYMOCK_SETUP.md](./KEYMOCK_SETUP.md) for detailed setup and usage instructions
+- **Quick start:** `docker-compose --profile authn up keymock`
+- Keymock runs on `http://localhost:8880` with realms `doctolib-pro` and `doctolib-patient`
+- Configuration is in `application-dev.yml` with trusted issuers pointing to Keymock
 
 **Files:**
 - `application/src/main/kotlin/.../model/User.kt`
@@ -176,7 +213,9 @@ Implement the base Wordle game functionality with persistence and authentication
   - `POST /api/game-state` (requires auth):
     - Saves state from localStorage when user logs in
 - [ ] Create `AuthController`:
-  - `GET /api/auth/login`: redirects to OAuth2 provider
+  - `GET /api/auth/login`: redirects to OAuth2 provider (Keymock in local dev)
+  - Configure OAuth2 redirect URLs to work with Keymock
+  - After successful login, user is redirected back to application with JWT token
 - [ ] Implement saving attempts and statistics:
   - Save each attempt with user ID, word, feedback, attempt number, timestamp
   - Update game state (state, attempts_count, timestamps)
