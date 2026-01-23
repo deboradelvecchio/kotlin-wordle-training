@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw'
 import type { HealthResponse } from '@api/models/HealthResponse'
-import type { WordOfTheDayResponse } from '@api/models/WordOfTheDayResponse'
 import type { AttemptResponse } from '@api/models/AttemptResponse'
 import type { LeaderboardResponse } from '@api/models/LeaderboardResponse'
+import type { GameStateResponse } from '@api/models/GameStateResponse'
 
 const API_BASE_URL = '/kotlin-wordle-training/api'
 
@@ -13,54 +13,47 @@ export const handlers = [
       status: 'ok',
       service: 'kotlin-wordle-training',
     })
-  }),
+  }), 
 
-  // Word of the day
-  http.get(`${API_BASE_URL}/word-of-the-day`, () => {
-    return HttpResponse.json<WordOfTheDayResponse>({
-      date: '2025-01-15',
-      gameState: 'not_started',
-      attempts: [],
-    })
-  }),
-
-  // Attempt word
   http.post(`${API_BASE_URL}/attempt`, async ({ request }) => {
-    const body = (await request.json()) as { word: string }
-    const { word } = body
+    const body = (await request.json()) as { guess: string }
+    const { guess } = body
 
     // Mock logic: check if word is correct
     const correctWord = 'HELLO'
-    const isCorrect = word.toUpperCase() === correctWord
+    const isCorrect = guess.toUpperCase() === correctWord
 
-    const feedback = Array.from(word.toUpperCase()).map((letter, index) => {
-      const correctLetter = correctWord[index]
-      if (letter === correctLetter) {
-        return { letter, status: 'correct' as const }
-      }
-      if (correctWord.includes(letter)) {
-        return { letter, status: 'present' as const }
-      }
-      return { letter, status: 'absent' as const }
-    })
+    // Generate feedback in backend format (CCPAA)
+    const feedback = Array.from(guess.toUpperCase())
+      .map((letter, index) => {
+        const correctLetter = correctWord[index]
+        if (letter === correctLetter) {
+          return 'C'
+        }
+        if (correctWord.includes(letter)) {
+          return 'P'
+        }
+        return 'A'
+      })
+      .join('')
 
-    const gameState = isCorrect ? 'won' : 'in_progress'
-    const attemptsRemaining = isCorrect ? 0 : 5 // Mock: assume 5 attempts remaining
+    const status = isCorrect ? 'WON' : 'IN_PROGRESS'
 
     return HttpResponse.json<AttemptResponse>({
-      word: word.toUpperCase(),
+      guess: guess.toUpperCase(),
       feedback,
-      isCorrect,
-      gameState,
-      attemptsRemaining,
+      attemptNumber: 1,
+      status,
     })
   }),
 
-  // Game state
+  // Game state - new backend format
   http.get(`${API_BASE_URL}/game-state`, () => {
-    return HttpResponse.json({
-      gameState: 'in_progress',
+    return HttpResponse.json<GameStateResponse>({
+      status: 'NOT_STARTED',
+      attemptsCount: 0,
       attempts: [],
+      maxAttempts: 6,
     })
   }),
 

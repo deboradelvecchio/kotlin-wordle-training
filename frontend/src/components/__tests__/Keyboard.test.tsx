@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@test/utils/testUtils'
 import userEvent from '@testing-library/user-event'
 import { Keyboard } from '../Keyboard'
-import type { Attempt } from '@api/models/WordOfTheDayResponse'
+import type { Attempt } from '@api/models/types'
 
 describe('Keyboard', () => {
   const mockAttempts: Attempt[] = [

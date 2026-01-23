@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@test/utils/testUtils'
 import { Board } from '../Board'
-import type { Attempt } from '@api/models/WordOfTheDayResponse'
+import type { Attempt } from '@api/models/types'
 
 describe('Board', () => {
   const mockAttempts: Attempt[] = [

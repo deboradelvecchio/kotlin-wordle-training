@@ -1,4 +1,4 @@
-import type { Attempt, GameState } from '@api/models/WordOfTheDayResponse'
+import type { Attempt, GameState } from '@api/models/types'
 
 const STORAGE_KEY = 'wordle-game-state'
 const STORAGE_DATE_KEY = 'wordle-game-date'

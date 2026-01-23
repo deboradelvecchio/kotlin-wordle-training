@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calculateLetterStatuses } from '../keyboard'
-import type { Attempt } from '@api/models/WordOfTheDayResponse'
+import type { Attempt } from '@api/models/types'
 
 describe('calculateLetterStatuses', () => {
   it('returns empty map for no attempts', () => {

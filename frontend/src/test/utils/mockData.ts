@@ -1,92 +1,61 @@
 import type { HealthResponse } from '@api/models/HealthResponse'
-import type { WordOfTheDayResponse } from '@api/models/WordOfTheDayResponse'
 import type { AttemptResponse } from '@api/models/AttemptResponse'
 import type { LeaderboardResponse } from '@api/models/LeaderboardResponse'
+import type { GameStateResponse } from '@api/models/GameStateResponse'
+import type { Attempt } from '@api/models/types'
 
 export const mockHealthResponse: HealthResponse = {
   status: 'ok',
   service: 'kotlin-wordle-training',
 }
 
-export const mockWordOfTheDayResponse: WordOfTheDayResponse = {
-  date: '2025-01-15',
-  gameState: 'not_started',
+export const mockGameStateNotStarted: GameStateResponse = {
+  status: 'NOT_STARTED',
+  attemptsCount: 0,
   attempts: [],
+  maxAttempts: 6,
 }
 
-export const mockWordOfTheDayInProgress: WordOfTheDayResponse = {
-  date: '2025-01-15',
-  gameState: 'in_progress',
+export const mockGameStateInProgress: GameStateResponse = {
+  status: 'IN_PROGRESS',
+  attemptsCount: 1,
   attempts: [
     {
-      word: 'WORLD',
-      feedback: [
-        { letter: 'W', status: 'absent' },
-        { letter: 'O', status: 'present' },
-        { letter: 'R', status: 'absent' },
-        { letter: 'L', status: 'present' },
-        { letter: 'D', status: 'absent' },
-      ],
-      attemptNumber: 1,
+      guess: 'WORLD',
+      feedback: 'APPPA',
     },
   ],
+  maxAttempts: 6,
 }
 
-export const mockWordOfTheDayWon: WordOfTheDayResponse = {
-  date: '2025-01-15',
-  gameState: 'won',
+export const mockGameStateWon: GameStateResponse = {
+  status: 'WON',
+  attemptsCount: 2,
   attempts: [
     {
-      word: 'WORLD',
-      feedback: [
-        { letter: 'W', status: 'absent' },
-        { letter: 'O', status: 'present' },
-        { letter: 'R', status: 'absent' },
-        { letter: 'L', status: 'present' },
-        { letter: 'D', status: 'absent' },
-      ],
-      attemptNumber: 1,
+      guess: 'WORLD',
+      feedback: 'APPPA',
     },
     {
-      word: 'HELLO',
-      feedback: [
-        { letter: 'H', status: 'correct' },
-        { letter: 'E', status: 'correct' },
-        { letter: 'L', status: 'correct' },
-        { letter: 'L', status: 'correct' },
-        { letter: 'O', status: 'correct' },
-      ],
-      attemptNumber: 2,
+      guess: 'HELLO',
+      feedback: 'CCCCC',
     },
   ],
+  maxAttempts: 6,
 }
 
 export const mockAttemptResponseCorrect: AttemptResponse = {
-  word: 'HELLO',
-  feedback: [
-    { letter: 'H', status: 'correct' },
-    { letter: 'E', status: 'correct' },
-    { letter: 'L', status: 'correct' },
-    { letter: 'L', status: 'correct' },
-    { letter: 'O', status: 'correct' },
-  ],
-  isCorrect: true,
-  gameState: 'won',
-  attemptsRemaining: 0,
+  guess: 'HELLO',
+  feedback: 'CCCCC',
+  attemptNumber: 2,
+  status: 'WON',
 }
 
 export const mockAttemptResponseIncorrect: AttemptResponse = {
-  word: 'WORLD',
-  feedback: [
-    { letter: 'W', status: 'absent' },
-    { letter: 'O', status: 'present' },
-    { letter: 'R', status: 'absent' },
-    { letter: 'L', status: 'present' },
-    { letter: 'D', status: 'absent' },
-  ],
-  isCorrect: false,
-  gameState: 'in_progress',
-  attemptsRemaining: 5,
+  guess: 'WORLD',
+  feedback: 'APPPA',
+  attemptNumber: 1,
+  status: 'IN_PROGRESS',
 }
 
 export const mockLeaderboardResponse: LeaderboardResponse = {
@@ -97,3 +66,16 @@ export const mockLeaderboardResponse: LeaderboardResponse = {
   ],
   currentUserRank: 2,
 }
+
+// Helper to create attempts in the old format (for component tests)
+export const createMockAttempt = (
+  word: string,
+  feedbackStatuses: Array<'correct' | 'present' | 'absent'>
+): Attempt => ({
+  word,
+  feedback: feedbackStatuses.map((status, i) => ({
+    letter: word[i],
+    status,
+  })),
+  attemptNumber: 1,
+})

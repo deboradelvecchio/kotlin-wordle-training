@@ -1,4 +1,4 @@
-import type { Attempt } from '@api/models/WordOfTheDayResponse'
+import type { Attempt } from '@api/models/types'
 
 export type LetterStatus = 'correct' | 'present' | 'absent'
 

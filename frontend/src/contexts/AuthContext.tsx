@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { useWordOfTheDay } from '@hooks/queries/useWordOfTheDay'
 
 type AuthContextType = {
   isAuthenticated: boolean
@@ -10,15 +9,12 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: wordOfTheDayData, isLoading } = useWordOfTheDay()
+const AUTH_TOKEN_KEY = 'auth_token'
 
-  const isAuthenticated = useMemo(
-    () =>
-      wordOfTheDayData?.attempts !== undefined ||
-      wordOfTheDayData?.gameState !== undefined,
-    [wordOfTheDayData]
-  )
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY)
+  const isAuthenticated = !!token
+  const isLoading = false
 
   const value = useMemo(
     () => ({ isAuthenticated, isLoading }),

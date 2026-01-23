@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { GameState } from '@api/models/WordOfTheDayResponse'
+import type { GameState } from '@api/models/types'
 
 type KeyboardHandlers = {
   onLetterInput: (letter: string) => void

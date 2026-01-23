@@ -1,3 +1,3 @@
 export type AttemptRequest = {
-  word: string
+  guess: string
 }

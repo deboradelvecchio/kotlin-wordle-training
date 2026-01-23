@@ -23,33 +23,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
-  /word-of-the-day:
-    get:
-      summary: Get the word of the day
-      description: |
-        Returns the word of the day and optionally game state.
-        - If not authenticated: returns only word and date
-        - If authenticated: returns word, date, attempts, and game state
-      operationId: getWordOfTheDay
-      tags:
-        - Wordle
-      responses:
-        '200':
-          description: Word of the day information
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WordOfTheDayResponse'
-
   /attempt:
     post:
       summary: Submit a word attempt
       description: |
         Validates the word and returns feedback for each letter.
-        - Validates word exists in dictionary
-        - Returns feedback (correct/present/absent) for each letter
-        - If authenticated and game is won: returns the solved word
-        - If not authenticated: word validation only, no solved word returned
+        - Works for both authenticated and anonymous users
+        - Returns feedback string (C=correct, P=present, A=absent)
+        - Updates game state for authenticated users
       operationId: attemptWord
       tags:
         - Wordle
@@ -67,21 +48,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/AttemptResponse'
         '400':
-          description: Invalid word (not 5 letters or not in dictionary)
-        '422':
-          description: Game already finished or no attempts remaining
+          description: Invalid word (not 5 letters)
 
   /game-state:
     get:
       summary: Get current game state
       description: |
         Returns the current game state with all attempts made so far.
-        Requires authentication.
+        - Authenticated: returns persisted game state
+        - Anonymous: returns empty state (frontend uses localStorage)
       operationId: getGameState
       tags:
         - Wordle
-      security:
-        - bearerAuth: []
       responses:
         '200':
           description: Current game state
@@ -90,7 +68,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GameStateResponse'
         '401':
-          description: Unauthorized (authentication required)
+          description: Unauthorized (only if token is invalid)
 
     post:
       summary: Save game state
@@ -141,7 +119,7 @@ paths:
     get:
       summary: Initiate OAuth2 login flow
       description: |
-        Redirects to DoctoBoot OAuth2 provider for authentication.
+        Redirects to OAuth2 provider for authentication.
         After successful login, user is redirected back to the application.
       operationId: login
       tags:
@@ -156,22 +134,18 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: DoctoBoot OAuth2 JWT token
+      description: OAuth2 JWT token
 
   schemas:
-    # Health schemas - referenced from external file
+    # Health schemas
     HealthResponse:
       $ref: './schemas/health.yaml#/HealthResponse'
     
-    # Wordle schemas - referenced from external file
-    LetterFeedback:
-      $ref: './schemas/wordle.yaml#/LetterFeedback'
-    Attempt:
-      $ref: './schemas/wordle.yaml#/Attempt'
-    GameState:
-      $ref: './schemas/wordle.yaml#/GameState'
-    WordOfTheDayResponse:
-      $ref: './schemas/wordle.yaml#/WordOfTheDayResponse'
+    # Wordle schemas
+    GameStatus:
+      $ref: './schemas/wordle.yaml#/GameStatus'
+    AttemptInfo:
+      $ref: './schemas/wordle.yaml#/AttemptInfo'
     AttemptRequest:
       $ref: './schemas/wordle.yaml#/AttemptRequest'
     AttemptResponse:

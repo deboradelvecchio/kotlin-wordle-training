@@ -1,8 +1,13 @@
-import type { Attempt, GameState } from './WordOfTheDayResponse'
+import type { GameStatus } from './AttemptResponse'
+
+export type AttemptInfo = {
+  guess: string
+  feedback: string
+}
 
 export type GameStateResponse = {
-  gameState: GameState
-  attempts: Attempt[]
-  word: string
-  date: string
+  status: GameStatus
+  attemptsCount: number
+  attempts: AttemptInfo[]
+  maxAttempts: number
 }

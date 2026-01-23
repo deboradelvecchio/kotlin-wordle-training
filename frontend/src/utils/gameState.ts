@@ -1,4 +1,4 @@
-import type { GameState } from '@api/models/WordOfTheDayResponse'
+import type { GameState } from '@api/models/types'
 
 export const GAME_CONSTANTS = {
   MAX_ATTEMPTS: 6,

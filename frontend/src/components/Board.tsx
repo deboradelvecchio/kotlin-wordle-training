@@ -1,4 +1,4 @@
-import type { Attempt, GameState } from '@api/models/WordOfTheDayResponse'
+import type { Attempt, GameState } from '@api/models/types'
 import { GAME_CONSTANTS, isGameActive } from '@utils/gameState'
 
 type BoardProps = {

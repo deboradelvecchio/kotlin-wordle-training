@@ -1,27 +1,27 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useWordOfTheDay } from '@hooks/queries/useWordOfTheDay'
 import { useAttemptWord } from '@hooks/queries/useAttemptWord'
 import { useKeyboardEvents } from './useKeyboardEvents'
-import type { GameState } from '@api/models/WordOfTheDayResponse'
+import type { GameState } from '@api/models/types'
 import { canInputLetter, canSubmitWord } from '@utils/gameState'
 import {
   getLocalStorageGameState,
   saveLocalStorageGameState,
   createEmptyGameState,
 } from '@utils/localStorage'
+import { parseFeedback, isCorrectAnswer } from '@utils/feedbackParser'
+
+// Get today's date in YYYY-MM-DD format
+function getTodayDate(): string {
+  return new Date().toISOString().split('T')[0]
+}
 
 export function useWordleGameAnonymous() {
-  const { data: wordOfTheDayData, isLoading, error } = useWordOfTheDay()
   const attemptMutation = useAttemptWord()
-
   const [currentWord, setCurrentWord] = useState('')
+  const todayDate = useMemo(() => getTodayDate(), [])
 
   const gameState = useMemo<GameState>(() => {
-    if (!wordOfTheDayData) {
-      return 'not_started'
-    }
-
-    const state = getLocalStorageGameState(wordOfTheDayData.date)
+    const state = getLocalStorageGameState(todayDate)
     if (!state) {
       return 'not_started'
     }
@@ -32,16 +32,12 @@ export function useWordleGameAnonymous() {
     }
 
     return state.gameState || 'not_started'
-  }, [wordOfTheDayData])
+  }, [todayDate])
 
   const attempts = useMemo(() => {
-    if (!wordOfTheDayData) {
-      return []
-    }
-
-    const state = getLocalStorageGameState(wordOfTheDayData.date)
+    const state = getLocalStorageGameState(todayDate)
     return state?.attempts || []
-  }, [wordOfTheDayData])
+  }, [todayDate])
 
   const handleLetterInput = useCallback(
     (letter: string) => {
@@ -63,33 +59,41 @@ export function useWordleGameAnonymous() {
   }, [currentWord.length])
 
   const handleEnter = useCallback(() => {
-    if (!canSubmitWord(currentWord, gameState) || !wordOfTheDayData) {
+    if (!canSubmitWord(currentWord, gameState)) {
       return
     }
 
     attemptMutation.mutate(
-      { word: currentWord },
+      { guess: currentWord },
       {
         onSuccess: data => {
           setCurrentWord('')
 
           const state =
-            getLocalStorageGameState(wordOfTheDayData.date) ||
-            createEmptyGameState(wordOfTheDayData.date)
+            getLocalStorageGameState(todayDate) ||
+            createEmptyGameState(todayDate)
+
+          // Convert backend format to frontend format
+          const feedbackArray = parseFeedback(data.guess, data.feedback)
+          const newGameState: GameState = isCorrectAnswer(data.feedback)
+            ? 'won'
+            : data.attemptNumber >= 6
+              ? 'lost'
+              : 'in_progress'
 
           state.attempts.push({
-            word: data.word,
-            feedback: data.feedback,
-            attemptNumber: state.attempts.length + 1,
+            word: data.guess,
+            feedback: feedbackArray,
+            attemptNumber: data.attemptNumber,
           })
-          state.gameState = data.gameState
+          state.gameState = newGameState
           state.currentWord = ''
 
           saveLocalStorageGameState(state)
         },
       }
     )
-  }, [currentWord, gameState, wordOfTheDayData, attemptMutation])
+  }, [currentWord, gameState, todayDate, attemptMutation])
 
   useKeyboardEvents(gameState, {
     onLetterInput: handleLetterInput,
@@ -98,12 +102,11 @@ export function useWordleGameAnonymous() {
   })
 
   return {
-    wordOfTheDay: wordOfTheDayData,
     attempts,
     currentWord,
     gameState,
-    isLoading: isLoading || attemptMutation.isPending,
-    error: error || attemptMutation.error,
+    isLoading: attemptMutation.isPending,
+    error: attemptMutation.error,
     handleLetterInput,
     handleBackspace,
     handleEnter,

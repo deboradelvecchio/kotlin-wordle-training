@@ -3,14 +3,10 @@ import { Keyboard } from '@components/Keyboard'
 import { GameHeader } from '@components/GameHeader'
 import { GameResult } from '@components/GameResult'
 import { useWordleGame } from '@hooks/ui/useWordleGame'
-import { useWordOfTheDayNotifications } from '@hooks/ui/useWordOfTheDayNotifications'
 import { isGameFinished } from '@utils/gameState'
 
 export function Game() {
-  // Listen for Server-Sent Events notifications about new words of the day
-  useWordOfTheDayNotifications()
   const {
-    wordOfTheDay,
     attempts,
     currentWord,
     gameState,
@@ -22,13 +18,12 @@ export function Game() {
   } = useWordleGame()
 
   const showKeyboard = !isGameFinished(gameState)
-  const isLoadingGame = isLoading && !wordOfTheDay
 
   return (
     <div className="game-container">
       <GameHeader isAuthenticated={isAuthenticated} />
 
-      {isLoadingGame ? (
+      {isLoading && attempts.length === 0 ? (
         <div className="game-loading">Loading...</div>
       ) : (
         <>

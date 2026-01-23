@@ -5,7 +5,6 @@
 
 // Query hooks (API calls)
 export { useHealth } from './queries/useHealth'
-export { useWordOfTheDay } from './queries/useWordOfTheDay'
 export { useAttemptWord } from './queries/useAttemptWord'
 export { useGameState } from './queries/useGameState'
 export { useLeaderboard } from './queries/useLeaderboard'
@@ -16,4 +15,4 @@ export { useWordleGame } from './ui/useWordleGame'
 export { useWordleGameAnonymous } from './ui/useWordleGameAnonymous'
 export { useWordleGameAuthenticated } from './ui/useWordleGameAuthenticated'
 export { useServerSentEvents } from './ui/useServerSentEvents'
-export { useWordOfTheDayNotifications } from './ui/useWordOfTheDayNotifications'
+export { useWordNotifications } from './ui/useWordNotifications'

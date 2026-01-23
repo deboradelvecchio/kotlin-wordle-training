@@ -1,10 +1,8 @@
-import type { LetterFeedback, GameState, Attempt } from './WordOfTheDayResponse'
+export type GameStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'WON' | 'LOST'
 
 export type AttemptResponse = {
-  word: string
-  feedback: LetterFeedback[]
-  isCorrect: boolean
-  gameState: GameState
-  attemptsRemaining: number
-  attempts?: Attempt[]
+  guess: string
+  feedback: string // "CCPAA" format: C=correct, P=present, A=absent
+  attemptNumber: number
+  status: GameStatus
 }

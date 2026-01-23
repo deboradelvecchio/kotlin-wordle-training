@@ -1,168 +1,109 @@
 # Wordle game schemas
 
-LetterFeedback:
-  type: object
-  properties:
-    letter:
-      type: string
-      minLength: 1
-      maxLength: 1
-      example: "A"
-    status:
-      type: string
-      enum: [correct, present, absent]
-      description: |
-        - correct: letter is in the correct position
-        - present: letter is in the word but wrong position
-        - absent: letter is not in the word
-      example: "correct"
-  required:
-    - letter
-    - status
+GameStatus:
+  type: string
+  enum: [NOT_STARTED, IN_PROGRESS, WON, LOST]
+  description: |
+    - NOT_STARTED: game hasn't started yet
+    - IN_PROGRESS: game is ongoing
+    - WON: game was won
+    - LOST: game was lost (6 attempts used)
 
-Attempt:
+AttemptInfo:
   type: object
   properties:
-    word:
+    guess:
       type: string
       minLength: 5
       maxLength: 5
+      description: The guessed word
       example: "HELLO"
     feedback:
-      type: array
-      items:
-        $ref: '#/LetterFeedback'
-      minItems: 5
-      maxItems: 5
-    attemptNumber:
-      type: integer
-      minimum: 1
-      maximum: 6
-      example: 1
-  required:
-    - word
-    - feedback
-    - attemptNumber
-
-GameState:
-  type: string
-  enum: [not_started, in_progress, won, lost]
-  description: |
-    - not_started: game hasn't started yet
-    - in_progress: game is ongoing
-    - won: game was won
-    - lost: game was lost (6 attempts used)
-
-WordOfTheDayResponse:
-  type: object
-  properties:
-    word:
       type: string
       minLength: 5
       maxLength: 5
-      description: The word of the day (always returned)
-      example: "HELLO"
-    date:
-      type: string
-      format: date
-      description: ISO date string for the word of the day
-      example: "2026-01-19"
-    attempts:
-      type: array
-      items:
-        $ref: '#/Attempt'
-      description: Previous attempts (only if authenticated)
-    gameState:
-      $ref: '#/GameState'
-      description: Current game state (only if authenticated)
+      description: |
+        Feedback string where each character represents:
+        - C: correct (letter in correct position)
+        - P: present (letter in word but wrong position)
+        - A: absent (letter not in word)
+      example: "CPPAA"
   required:
-    - word
-    - date
+    - guess
+    - feedback
 
 AttemptRequest:
   type: object
   properties:
-    word:
+    guess:
       type: string
       minLength: 5
       maxLength: 5
       description: The word to attempt
       example: "HELLO"
   required:
-    - word
+    - guess
 
 AttemptResponse:
   type: object
   properties:
-    word:
+    guess:
       type: string
       minLength: 5
       maxLength: 5
       description: The word that was attempted
       example: "HELLO"
     feedback:
-      type: array
-      items:
-        $ref: '#/LetterFeedback'
-      minItems: 5
-      maxItems: 5
-      description: Feedback for each letter
-    isCorrect:
-      type: boolean
-      description: Whether the word is correct
-      example: false
-    gameState:
-      $ref: '#/GameState'
-      description: Updated game state after this attempt
-    attemptsRemaining:
-      type: integer
-      minimum: 0
-      maximum: 6
-      description: Number of attempts remaining
-      example: 5
-    solvedWord:
       type: string
       minLength: 5
       maxLength: 5
-      description: The solved word (only returned if game is won and user is authenticated)
-      example: "HELLO"
-    attempts:
-      type: array
-      items:
-        $ref: '#/Attempt'
       description: |
-        Complete attempts array (only returned if user is authenticated).
-        Included to avoid an extra API call - frontend can update cache directly.
+        Feedback string where each character represents:
+        - C: correct (letter in correct position)
+        - P: present (letter in word but wrong position)
+        - A: absent (letter not in word)
+      example: "CPPAA"
+    attemptNumber:
+      type: integer
+      minimum: 1
+      maximum: 6
+      description: The attempt number (1-6)
+      example: 1
+    status:
+      $ref: '#/GameStatus'
+      description: Updated game status after this attempt
   required:
-    - word
+    - guess
     - feedback
-    - isCorrect
-    - gameState
-    - attemptsRemaining
+    - attemptNumber
+    - status
 
 GameStateResponse:
   type: object
   properties:
-    gameState:
-      $ref: '#/GameState'
+    status:
+      $ref: '#/GameStatus'
+      description: Current game status
+    attemptsCount:
+      type: integer
+      minimum: 0
+      maximum: 6
+      description: Number of attempts made
+      example: 2
     attempts:
       type: array
       items:
-        $ref: '#/Attempt'
-    word:
-      type: string
-      minLength: 5
-      maxLength: 5
-      description: The word of the day
-    date:
-      type: string
-      format: date
-      description: ISO date string for the word of the day
+        $ref: '#/AttemptInfo'
+      description: List of previous attempts
+    maxAttempts:
+      type: integer
+      description: Maximum number of attempts allowed
+      example: 6
   required:
-    - gameState
+    - status
+    - attemptsCount
     - attempts
-    - word
-    - date
+    - maxAttempts
 
 LeaderboardEntry:
   type: object
@@ -213,12 +154,7 @@ SaveGameStateRequest:
     attempts:
       type: array
       items:
-        $ref: '#/Attempt'
+        $ref: '#/AttemptInfo'
       description: All attempts made so far
-    date:
-      type: string
-      format: date
-      description: ISO date string for the word of the day
   required:
     - attempts
-    - date

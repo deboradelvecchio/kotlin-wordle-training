@@ -1,4 +1,4 @@
-import type { Attempt } from '@api/models/WordOfTheDayResponse'
+import type { Attempt } from '@api/models/types'
 import { calculateLetterStatuses } from '@utils/keyboard'
 import type { LetterStatus } from '@utils/keyboard'
 
