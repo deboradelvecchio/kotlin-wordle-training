@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useAttemptWord } from '@hooks/queries/useAttemptWord'
 import { useKeyboardEvents } from './useKeyboardEvents'
-import type { GameState } from '@api/models/types'
+import type { GameState, Attempt } from '@api/models/types'
 import { canInputLetter, canSubmitWord } from '@utils/gameState'
 import {
   getLocalStorageGameState,
@@ -20,24 +20,17 @@ export function useWordleGameAnonymous() {
   const [currentWord, setCurrentWord] = useState('')
   const todayDate = useMemo(() => getTodayDate(), [])
 
-  const gameState = useMemo<GameState>(() => {
+  // Load initial state from localStorage
+  const initialState = useMemo(() => {
     const state = getLocalStorageGameState(todayDate)
-    if (!state) {
-      return 'not_started'
-    }
-
-    // If there are attempts but state is not_started, game is in progress
-    if (state.attempts.length > 0 && state.gameState === 'not_started') {
-      return 'in_progress'
-    }
-
-    return state.gameState || 'not_started'
+    return state || createEmptyGameState(todayDate)
   }, [todayDate])
 
-  const attempts = useMemo(() => {
-    const state = getLocalStorageGameState(todayDate)
-    return state?.attempts || []
-  }, [todayDate])
+  // Use state instead of useMemo to enable re-renders
+  const [attempts, setAttempts] = useState<Attempt[]>(initialState.attempts || [])
+  const [gameState, setGameState] = useState<GameState>(
+    initialState.gameState || 'not_started'
+  )
 
   const handleLetterInput = useCallback(
     (letter: string) => {
@@ -67,33 +60,40 @@ export function useWordleGameAnonymous() {
       { guess: currentWord },
       {
         onSuccess: data => {
-          setCurrentWord('')
-
-          const state =
-            getLocalStorageGameState(todayDate) ||
-            createEmptyGameState(todayDate)
-
           // Convert backend format to frontend format
           const feedbackArray = parseFeedback(data.guess, data.feedback)
+          
+          // Calculate attempt number locally (backend returns 0 for anonymous)
+          const attemptNumber = attempts.length + 1
+          
           const newGameState: GameState = isCorrectAnswer(data.feedback)
             ? 'won'
-            : data.attemptNumber >= 6
+            : attemptNumber >= 6
               ? 'lost'
               : 'in_progress'
 
-          state.attempts.push({
+          const newAttempt: Attempt = {
             word: data.guess,
             feedback: feedbackArray,
-            attemptNumber: data.attemptNumber,
-          })
+            attemptNumber,
+          }
+
+          // Update state
+          const newAttempts = [...attempts, newAttempt]
+          setAttempts(newAttempts)
+          setGameState(newGameState)
+          setCurrentWord('')
+
+          // Save to localStorage
+          const state = getLocalStorageGameState(todayDate) || createEmptyGameState(todayDate)
+          state.attempts = newAttempts
           state.gameState = newGameState
           state.currentWord = ''
-
           saveLocalStorageGameState(state)
         },
       }
     )
-  }, [currentWord, gameState, todayDate, attemptMutation])
+  }, [currentWord, gameState, todayDate, attemptMutation, attempts])
 
   useKeyboardEvents(gameState, {
     onLetterInput: handleLetterInput,
