@@ -29,33 +29,93 @@ This document describes the workshop phases and corresponding branches. Each com
 
 ## Branch Structure
 
-Each component/sub-phase has its own branch, allowing maximum flexibility in what to include.
+The project uses a modular branch structure with two types of branches:
 
-### Branch Structure
+### Checkpoint Branches (Starting Points)
+
+These are fully working branches you can start from:
 
 ```
-main (base setup - frontend complete, backend base)
-  ├── phase-1-user-entity (User entity and repository)
-  ├── phase-1-database-migrations (Database schema and migrations)
-  ├── phase-1-word-fetcher (External API integration)
-  ├── phase-1-word-verification (Word validation algorithm)
-  ├── phase-1-controllers (API endpoints)
-  ├── phase-1-complete (all Phase 1 components combined)
-  │
-  ├── phase-2-ranking-algorithm (Ranking calculation)
-  ├── phase-2-leaderboard-endpoint (Leaderboard API)
-  ├── phase-2-complete (all Phase 2 components combined)
-  │
-  ├── phase-3-scheduled-jobs (Scheduled word generation)
-  ├── phase-3-kafka-setup (Kafka producer configuration)
-  ├── phase-3-sse-endpoint (Server-Sent Events)
-  ├── phase-3-complete (all Phase 3 components combined)
+main                    → Base setup (frontend complete, backend base)
+start-phase-1           → = main (for those who want to build everything from scratch)
+start-phase-2           → Phase 1 COMPLETE (for those who want to skip Phase 1)
+start-phase-3           → Phase 1+2 COMPLETE (for those who want to skip to Phase 3)
+solution-complete       → Everything implemented (final reference)
 ```
 
-**Usage:**
-- Create branches from `main` for each component
-- `*-complete` branches contain all components from that phase
-- Mix and match components as needed for your workshop flow
+### Solution Branches (Component Solutions)
+
+These contain solutions for individual components. Use them to:
+- Compare your implementation
+- Copy specific parts you don't want to implement
+- Study how something is done
+
+```
+solution/phase-1-user-entity         → User entity and repository
+solution/phase-1-database-migrations → Database schema and migrations
+solution/phase-1-word-fetcher        → External API integration
+solution/phase-1-word-verification   → Word validation algorithm
+solution/phase-1-controllers         → API endpoints
+
+solution/phase-2-ranking-algorithm   → Ranking calculation
+solution/phase-2-leaderboard-endpoint → Leaderboard API
+
+solution/phase-3-scheduled-jobs      → Scheduled word generation
+solution/phase-3-kafka-setup         → Kafka producer configuration
+solution/phase-3-sse-endpoint        → Server-Sent Events
+```
+
+### How to Use
+
+**⚠️ Important:** Never modify the checkpoint or solution branches directly! Always create your own branch from them.
+
+| I want to... | Create branch from... | Implement... |
+|--------------|----------------------|--------------|
+| Build everything from scratch | `start-phase-1` | Everything |
+| Skip Phase 1, do Phase 2+3 | `start-phase-2` | Phase 2 and 3 |
+| Only do Kafka/SSE | `start-phase-3` | Only Phase 3 |
+| See how X is done | `solution/X` | Nothing, just study |
+| Do Phase 1 but skip word-fetcher | `start-phase-1` + merge `solution/phase-1-word-fetcher` | Everything except word-fetcher |
+
+### Example Workflows
+
+**Beginner (wants to learn everything):**
+```bash
+# Create your own branch from start-phase-1
+git checkout -b my-wordle-implementation start-phase-1
+
+# Implement Phase 1 step by step
+# If stuck on word-verification, compare with solution:
+git diff solution/phase-1-word-verification
+```
+
+**Intermediate (wants to focus on Phase 2+3):**
+```bash
+# Create your own branch from start-phase-2 (Phase 1 already done)
+git checkout -b my-wordle-implementation start-phase-2
+
+# Implement Phase 2 and 3
+```
+
+**Advanced (only interested in Kafka):**
+```bash
+# Create your own branch from start-phase-3 (Phase 1+2 already done)
+git checkout -b my-kafka-implementation start-phase-3
+
+# Implement only Kafka/SSE
+```
+
+**Mix and match:**
+```bash
+# Create your own branch from start-phase-1
+git checkout -b my-wordle-implementation start-phase-1
+
+# Merge solutions for parts you want to skip
+git merge solution/phase-1-user-entity
+git merge solution/phase-1-database-migrations
+
+# Now implement only word-fetcher, word-verification, and controllers yourself
+```
 
 ---
 
@@ -67,7 +127,7 @@ Implement the base Wordle game functionality with persistence and authentication
 ### Components
 
 #### 1. User Entity and Repository
-**Branch:** `phase-1-user-entity`
+**Solution Branch:** `solution/phase-1-user-entity`
 
 **Do we need a User entity in the database?**
 
@@ -126,7 +186,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 2. Database Migrations (Game Entities)
-**Branch:** `phase-1-database-migrations`
+**Solution Branch:** `solution/phase-1-database-migrations`
 
 - [ ] Create JPA entities:
   - `Word` (id, word, created_at)
@@ -155,7 +215,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 3. Word Fetcher Service
-**Branch:** `phase-1-word-fetcher`
+**Solution Branch:** `solution/phase-1-word-fetcher`
 
 - [ ] Create `WordFetcherService`:
   - Call `https://random-word-api.herokuapp.com/word?length=5`
@@ -174,7 +234,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 4. Word Verification Algorithm
-**Branch:** `phase-1-word-verification`
+**Solution Branch:** `solution/phase-1-word-verification`
 
 - [ ] Create `WordVerificationService`:
   - Word validation (5 letters, exists in dictionary)
@@ -199,7 +259,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 5. API Controllers
-**Branch:** `phase-1-controllers`
+**Solution Branch:** `solution/phase-1-controllers`
 
 - [ ] Create `WordleController` with endpoints:
   - `POST /api/attempt`:
@@ -229,7 +289,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 6. Complete Phase 1
-**Branch:** `phase-1-complete`
+**Checkpoint Branch:** `start-phase-2` (contains all Phase 1)
 
 Contains all Phase 1 components combined:
 - User entity and repository
@@ -248,7 +308,7 @@ Implement leaderboard system based on customizable ranking algorithm.
 ### Components
 
 #### 1. Ranking Algorithm
-**Branch:** `phase-2-ranking-algorithm`
+**Solution Branch:** `solution/phase-2-ranking-algorithm`
 
 - [ ] Define ranking algorithm that combines:
   - Number of attempts (fewer = better)
@@ -266,7 +326,7 @@ Implement leaderboard system based on customizable ranking algorithm.
 ---
 
 #### 2. Leaderboard Endpoint
-**Branch:** `phase-2-leaderboard-endpoint`
+**Solution Branch:** `solution/phase-2-leaderboard-endpoint`
 
 - [ ] Create `LeaderboardController`:
   - `GET /api/leaderboard`:
@@ -285,7 +345,7 @@ Implement leaderboard system based on customizable ranking algorithm.
 ---
 
 #### 3. Complete Phase 2
-**Branch:** `phase-2-complete`
+**Checkpoint Branch:** `start-phase-3` (contains all Phase 1+2)
 
 Contains all Phase 2 components combined:
 - Ranking algorithm
@@ -301,7 +361,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 ### Components
 
 #### 1. Scheduled Jobs
-**Branch:** `phase-3-scheduled-jobs`
+**Solution Branch:** `solution/phase-3-scheduled-jobs`
 
 - [ ] Create `@Scheduled` job that:
   - Runs every 3 hours
@@ -319,7 +379,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 ---
 
 #### 2. Kafka Setup
-**Branch:** `phase-3-kafka-setup`
+**Solution Branch:** `solution/phase-3-kafka-setup`
 
 - [ ] Add Kafka dependencies to `pom.xml`
 - [ ] Configure Kafka producer
@@ -339,7 +399,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 ---
 
 #### 3. Server-Sent Events (SSE) Endpoint
-**Branch:** `phase-3-sse-endpoint`
+**Solution Branch:** `solution/phase-3-sse-endpoint`
 
 - [ ] Create SSE endpoint `GET /api/events/word-of-the-day`:
   - Streams events to connected clients
@@ -365,7 +425,7 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 ---
 
 #### 4. Daily Leaderboard Aggregation (Optional - for participants)
-**Branch:** `phase-3-aggregation` (optional)
+**Solution Branch:** `solution/phase-3-aggregation` (optional)
 
 - [ ] Scheduled job that runs daily (e.g., midnight):
   - Takes all leaderboards from previous day
@@ -383,7 +443,7 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 ---
 
 #### 5. Complete Phase 3
-**Branch:** `phase-3-complete`
+**Checkpoint Branch:** `solution-complete` (contains everything)
 
 Contains all Phase 3 components combined:
 - Scheduled jobs
@@ -417,21 +477,26 @@ Contains all Phase 3 components combined:
 ### Branch Usage Strategy
 
 **For Workshop Presenters:**
-1. Create individual component branches from `main`
-2. Implement each component independently
-3. Create `*-complete` branches that merge all components
-4. Participants can:
-   - Start from `*-complete` branches
-   - Or pick specific components they want to implement
-   - Or start from `main` and add components one by one
+1. Create checkpoint branches (`start-phase-*`) as starting points
+2. Create solution branches (`solution/*`) for each component
+3. `solution-complete` contains everything implemented
 
-**Example Workflow:**
-```
-# Participant wants to implement word verification but not database migrations
-git checkout main
-git checkout -b my-implementation
-git merge phase-1-word-verification
-# Now they have word verification but can implement migrations themselves
+**For Participants:**
+1. **Always create your own branch** from a checkpoint (never modify checkpoint/solution branches)
+2. Choose your starting point based on skill level
+3. Implement what you want to learn
+4. Merge solution branches for parts you want to skip
+5. Compare your code with solution branches when stuck
+
+**Creating Your Own Implementation Branch:**
+```bash
+# Create your own branch from a checkpoint
+git checkout -b my-implementation start-phase-2
+
+# Implement what you want, merge what you don't
+git merge solution/phase-2-ranking-algorithm
+
+# Now implement only the leaderboard endpoint yourself
 ```
 
 ### SSE Implementation Details
