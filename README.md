@@ -179,18 +179,18 @@ The following endpoints need to be implemented in the backend. All specification
 - Accepts `AttemptRequest` with a 5-letter word
 - Validates word exists in dictionary (5 letters, valid word)
 - Calculates feedback for each letter:
-  - `correct`: letter is in correct position
-  - `present`: letter is in word but wrong position
-  - `absent`: letter is not in word
+- `correct`: letter is in correct position
+- `present`: letter is in word but wrong position
+- `absent`: letter is not in word
 - **If authenticated:**
-  - Save attempt to database
-  - Update game state
-  - If game is won: return `solvedWord` in response
-  - Return `attempts` array in response (to avoid extra API call)
+- Save attempt to database
+- Update game state
+- If game is won: return `solvedWord` in response
+- Return `attempts` array in response (to avoid extra API call)
 - **If NOT authenticated:**
-  - Only validate word and return feedback
-  - Do not save anything
-  - Do not return `solvedWord` or `attempts`
+- Only validate word and return feedback
+- Do not save anything
+- Do not return `solvedWord` or `attempts`
 
 **Response Schema:** `AttemptResponse`
 
@@ -293,7 +293,7 @@ The following endpoints need to be implemented in the backend. All specification
 2. **Word Selection**: Words are fetched from `https://random-word-api.herokuapp.com/word?length=5`
 3. **Security**: The word is **never** returned to the client - it's only stored server-side and used to validate attempts
 4. **Authentication**: Use DoctoBoot's authentication mechanisms to check if user is authenticated
-5. **Database**: 
+5. **Database**:
    - User entity with `external_id` from JWT `sub` claim
    - Word entity with `created_at` timestamp (most recent word is current)
    - GameState and GameAttempt entities for tracking game progress

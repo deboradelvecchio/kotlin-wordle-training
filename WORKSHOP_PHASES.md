@@ -69,17 +69,18 @@ solution/phase-3-sse-endpoint        → Server-Sent Events
 
 **⚠️ Important:** Never modify the checkpoint or solution branches directly! Always create your own branch from them.
 
-| I want to... | Create branch from... | Implement... |
-|--------------|----------------------|--------------|
-| Build everything from scratch | `start-phase-1` | Everything |
-| Skip Phase 1, do Phase 2+3 | `start-phase-2` | Phase 2 and 3 |
-| Only do Kafka/SSE | `start-phase-3` | Only Phase 3 |
-| See how X is done | `solution/X` | Nothing, just study |
+|           I want to...           |                  Create branch from...                  |          Implement...          |
+|----------------------------------|---------------------------------------------------------|--------------------------------|
+| Build everything from scratch    | `start-phase-1`                                         | Everything                     |
+| Skip Phase 1, do Phase 2+3       | `start-phase-2`                                         | Phase 2 and 3                  |
+| Only do Kafka/SSE                | `start-phase-3`                                         | Only Phase 3                   |
+| See how X is done                | `solution/X`                                            | Nothing, just study            |
 | Do Phase 1 but skip word-fetcher | `start-phase-1` + merge `solution/phase-1-word-fetcher` | Everything except word-fetcher |
 
 ### Example Workflows
 
 **Beginner (wants to learn everything):**
+
 ```bash
 # Create your own branch from start-phase-1
 git checkout -b my-wordle-implementation start-phase-1
@@ -90,6 +91,7 @@ git diff solution/phase-1-word-verification
 ```
 
 **Intermediate (wants to focus on Phase 2+3):**
+
 ```bash
 # Create your own branch from start-phase-2 (Phase 1 already done)
 git checkout -b my-wordle-implementation start-phase-2
@@ -98,6 +100,7 @@ git checkout -b my-wordle-implementation start-phase-2
 ```
 
 **Advanced (only interested in Kafka):**
+
 ```bash
 # Create your own branch from start-phase-3 (Phase 1+2 already done)
 git checkout -b my-kafka-implementation start-phase-3
@@ -106,6 +109,7 @@ git checkout -b my-kafka-implementation start-phase-3
 ```
 
 **Mix and match:**
+
 ```bash
 # Create your own branch from start-phase-1
 git checkout -b my-wordle-implementation start-phase-1
@@ -122,11 +126,13 @@ git merge solution/phase-1-database-migrations
 ## Phase 1: Base Game Functionality
 
 ### Objectives
+
 Implement the base Wordle game functionality with persistence and authentication.
 
 ### Components
 
 #### 1. User Entity and Repository
+
 **Solution Branch:** `solution/phase-1-user-entity`
 
 **Do we need a User entity in the database?**
@@ -138,24 +144,24 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 - Fields: `id`, `username`, `email`, `external_id`, `created_at`, `updated_at`
 - `external_id`: from JWT `sub` claim (identifies user across sessions)
 - **Pros:**
-  - Fast queries for leaderboard (username already in DB)
-  - No need to call Keymock/OAuth2 provider for user info
-  - Can add custom fields later (preferences, stats, etc.)
-  - Common pattern: OAuth2 for auth, local DB for application data
+- Fast queries for leaderboard (username already in DB)
+- No need to call Keymock/OAuth2 provider for user info
+- Can add custom fields later (preferences, stats, etc.)
+- Common pattern: OAuth2 for auth, local DB for application data
 - **Cons:**
-  - Need to sync with OAuth2 provider (username/email might change)
-  - Slight duplication of data
+- Need to sync with OAuth2 provider (username/email might change)
+- Slight duplication of data
 
 **Option B: No User Entity (Alternative)**
 - Use `external_id` directly in `GameState` and `GameAttempt` tables
 - Extract username/email from JWT token when needed
 - **Pros:**
-  - Simpler schema
-  - No sync needed
+- Simpler schema
+- No sync needed
 - **Cons:**
-  - Need to decode JWT for every leaderboard query
-  - Username might not be available if token expired
-  - Harder to query by username
+- Need to decode JWT for every leaderboard query
+- Username might not be available if token expired
+- Harder to query by username
 
 **Recommendation:** Use Option A (User entity) for better performance and flexibility.
 
@@ -186,6 +192,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 2. Database Migrations (Game Entities)
+
 **Solution Branch:** `solution/phase-1-database-migrations`
 
 - [ ] Create JPA entities:
@@ -215,6 +222,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 3. Word Fetcher Service
+
 **Solution Branch:** `solution/phase-1-word-fetcher`
 
 - [ ] Create `WordFetcherService`:
@@ -229,11 +237,12 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 
 **Files:**
 - `application/src/main/kotlin/.../service/WordFetcherService.kt`
-- `application/src/main/kotlin/.../repository/WordRepository.kt` 
+- `application/src/main/kotlin/.../repository/WordRepository.kt`
 
 ---
 
 #### 4. Word Verification Algorithm
+
 **Solution Branch:** `solution/phase-1-word-verification`
 
 - [ ] Create `WordVerificationService`:
@@ -259,6 +268,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 5. API Controllers
+
 **Solution Branch:** `solution/phase-1-controllers`
 
 - [ ] Create `WordleController` with endpoints:
@@ -289,6 +299,7 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 ---
 
 #### 6. Complete Phase 1
+
 **Checkpoint Branch:** `start-phase-2` (contains all Phase 1)
 
 Contains all Phase 1 components combined:
@@ -303,11 +314,13 @@ Contains all Phase 1 components combined:
 ## Phase 2: Leaderboard
 
 ### Objectives
+
 Implement leaderboard system based on customizable ranking algorithm.
 
 ### Components
 
 #### 1. Ranking Algorithm
+
 **Solution Branch:** `solution/phase-2-ranking-algorithm`
 
 - [ ] Define ranking algorithm that combines:
@@ -326,6 +339,7 @@ Implement leaderboard system based on customizable ranking algorithm.
 ---
 
 #### 2. Leaderboard Endpoint
+
 **Solution Branch:** `solution/phase-2-leaderboard-endpoint`
 
 - [ ] Create `LeaderboardController`:
@@ -345,6 +359,7 @@ Implement leaderboard system based on customizable ranking algorithm.
 ---
 
 #### 3. Complete Phase 2
+
 **Checkpoint Branch:** `start-phase-3` (contains all Phase 1+2)
 
 Contains all Phase 2 components combined:
@@ -356,11 +371,13 @@ Contains all Phase 2 components combined:
 ## Phase 3: Scheduled Jobs, Kafka Events, and SSE
 
 ### Objectives
+
 Implement scheduled jobs for automatic word management, Kafka event publishing, and real-time notifications via Server-Sent Events.
 
 ### Components
 
 #### 1. Scheduled Jobs
+
 **Solution Branch:** `solution/phase-3-scheduled-jobs`
 
 - [ ] Create `@Scheduled` job that:
@@ -379,6 +396,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 ---
 
 #### 2. Kafka Setup
+
 **Solution Branch:** `solution/phase-3-kafka-setup`
 
 - [ ] Add Kafka dependencies to `pom.xml`
@@ -399,6 +417,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 ---
 
 #### 3. Server-Sent Events (SSE) Endpoint
+
 **Solution Branch:** `solution/phase-3-sse-endpoint`
 
 - [ ] Create SSE endpoint `GET /api/events/word-of-the-day`:
@@ -425,6 +444,7 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 ---
 
 #### 4. Daily Leaderboard Aggregation (Optional - for participants)
+
 **Solution Branch:** `solution/phase-3-aggregation` (optional)
 
 - [ ] Scheduled job that runs daily (e.g., midnight):
@@ -443,6 +463,7 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 ---
 
 #### 5. Complete Phase 3
+
 **Checkpoint Branch:** `solution-complete` (contains everything)
 
 Contains all Phase 3 components combined:
@@ -458,7 +479,7 @@ Contains all Phase 3 components combined:
 ### Decisions Made
 
 1. **Word API**: Uses `https://random-word-api.herokuapp.com/word?length=5` (5-letter words)
-2. **Word Management**: 
+2. **Word Management**:
    - Database uses `Word` entity with `created_at` timestamp
    - Initially, implementations use "word of the day" logic (one word per day, filtering by date)
 3. **User Management**:
@@ -489,6 +510,7 @@ Contains all Phase 3 components combined:
 5. Compare your code with solution branches when stuck
 
 **Creating Your Own Implementation Branch:**
+
 ```bash
 # Create your own branch from a checkpoint
 git checkout -b my-implementation start-phase-2
@@ -502,6 +524,7 @@ git merge solution/phase-2-ranking-algorithm
 ### SSE Implementation Details
 
 **Backend SSE Endpoint:**
+
 ```kotlin
 @GetMapping("/events/word-of-the-day", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
 fun wordOfTheDayEvents(): SseEmitter {
@@ -511,6 +534,7 @@ fun wordOfTheDayEvents(): SseEmitter {
 ```
 
 **Event Format:**
+
 ```
 data: {"type":"NEW_WORD_OF_THE_DAY","date":"2026-01-20","timestamp":1737417600}
 

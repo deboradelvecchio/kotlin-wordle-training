@@ -33,6 +33,7 @@ Keymock comes with two pre-configured realms:
 - `doctolib-patient` (for patients)
 
 These are already configured in `application-dev.yml`:
+
 ```yaml
 doctoboot:
   authentication:
@@ -73,6 +74,7 @@ After login, the JWT token will contain these claims:
 ### 1. User Initiates Login
 
 User clicks login button → Frontend calls:
+
 ```
 GET /api/auth/login
 ```
@@ -80,6 +82,7 @@ GET /api/auth/login
 ### 2. Backend Redirects to Keymock
 
 Backend redirects to Keymock authorization endpoint:
+
 ```
 http://localhost:8880/realms/doctolib-pro/protocol/openid-connect/auth
   ?client_id=your-client-id
@@ -95,6 +98,7 @@ User enters credentials in Keymock login page.
 ### 4. Keymock Redirects Back
 
 Keymock redirects back to your app with authorization code:
+
 ```
 http://localhost:8080/kotlin-wordle-training/api/auth/callback?code=AUTHORIZATION_CODE
 ```
@@ -102,6 +106,7 @@ http://localhost:8080/kotlin-wordle-training/api/auth/callback?code=AUTHORIZATIO
 ### 5. Backend Exchanges Code for Token
 
 Backend exchanges authorization code for JWT token:
+
 ```
 POST http://localhost:8880/realms/doctolib-pro/protocol/openid-connect/token
   grant_type=authorization_code
@@ -147,16 +152,19 @@ The application is already configured to use Keymock in `application-dev.yml`. M
 ## Troubleshooting
 
 ### Keymock not starting
+
 - Check if port 8880 is already in use
 - Verify Docker is running
 - Check logs: `docker-compose logs keymock`
 
 ### Login redirect not working
+
 - Verify Keymock is running: `curl http://localhost:8880/actuator/health`
 - Check redirect URI matches in both Keymock client config and backend config
 - Verify CORS is configured correctly
 
 ### JWT token not validating
+
 - Check issuer matches exactly (including trailing slash)
 - Verify JWKS URI is accessible
 - Check token expiration time
@@ -166,3 +174,4 @@ The application is already configured to use Keymock in `application-dev.yml`. M
 - Keymock documentation (if available)
 - DoctoBoot OAuth2 configuration
 - Keycloak documentation (Keymock mimics Keycloak behavior)
+
