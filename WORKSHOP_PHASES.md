@@ -17,11 +17,12 @@ This document describes the workshop phases and corresponding branches. Each com
   - [2. Leaderboard Endpoint](#2-leaderboard-endpoint)
   - [3. Complete Phase 2](#3-complete-phase-2)
 - [Phase 3: Scheduled Jobs, Kafka Events, and SSE](#phase-3-scheduled-jobs-kafka-events-and-sse)
-  - [1. Scheduled Jobs](#1-scheduled-jobs)
-  - [2. Kafka Setup](#2-kafka-setup)
-  - [3. Server-Sent Events (SSE) Endpoint](#3-server-sent-events-sse-endpoint)
-  - [4. Daily Leaderboard Aggregation (Optional)](#4-daily-leaderboard-aggregation-optional---for-participants)
-  - [5. Complete Phase 3](#5-complete-phase-3)
+  - [1. Daily Word Scheduler](#1-daily-word-scheduler)
+  - [2. Periodic Word Refresh](#2-periodic-word-refresh)
+  - [3. Kafka Setup](#3-kafka-setup)
+  - [4. Server-Sent Events (SSE) Endpoint](#4-server-sent-events-sse-endpoint)
+  - [5. Daily Leaderboard Aggregation (Optional)](#5-daily-leaderboard-aggregation-optional---for-participants)
+  - [6. Complete Phase 3](#6-complete-phase-3)
 - [Technical Notes](#technical-notes)
   - [Decisions Made](#decisions-made)
   - [Branch Usage Strategy](#branch-usage-strategy)
@@ -57,12 +58,13 @@ solution/phase-1-word-fetcher        → External API integration
 solution/phase-1-word-verification   → Word validation algorithm
 solution/phase-1-controllers         → API endpoints
 
-solution/phase-2-ranking-algorithm   → Ranking calculation
-solution/phase-2-leaderboard-endpoint → Leaderboard API
+solution/phase-2-ranking-algorithm     → Ranking calculation
+solution/phase-2-leaderboard-endpoint  → Leaderboard API
 
-solution/phase-3-scheduled-jobs      → Scheduled word generation
-solution/phase-3-kafka-setup         → Kafka producer configuration
-solution/phase-3-sse-endpoint        → Server-Sent Events
+solution/phase-3-scheduled-daily-word  → Daily word generation at midnight
+solution/phase-3-scheduled-jobs        → Periodic word refresh (every 3 hours)
+solution/phase-3-kafka-setup           → Kafka producer configuration
+solution/phase-3-sse-endpoint          → Server-Sent Events
 ```
 
 ### How to Use
@@ -376,26 +378,43 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 
 ### Components
 
-#### 1. Scheduled Jobs
+#### 1. Daily Word Scheduler
+
+**Solution Branch:** `solution/phase-3-scheduled-daily-word`
+
+- [ ] Enable Spring Scheduling with `@EnableScheduling`
+- [ ] Create `@Scheduled` job that:
+  - Runs every day at midnight (`cron = "0 0 0 * * *"`)
+  - Calls external API for new word
+  - Saves new word in database with `created_at` timestamp
+- [ ] Refactor `WordFetcherService.getCurrentWord()` to NOT auto-generate on first call
+- [ ] Add `fetchAndSaveNewWord()` method to `WordFetcherService`
+
+**Files:**
+- `application/src/main/kotlin/.../scheduler/DailyWordScheduler.kt`
+- `application/src/main/kotlin/.../KotlinWordleTrainingApplication.kt` (add @EnableScheduling)
+
+---
+
+#### 2. Periodic Word Refresh
 
 **Solution Branch:** `solution/phase-3-scheduled-jobs`
 
 - [ ] Create `@Scheduled` job that:
-  - Runs every 3 hours
+  - Runs every 3 hours (`cron = "0 0 */3 * * *"`)
   - Calls external API for new word
   - Saves new word in database with `created_at` timestamp
   - Publishes Kafka event `NEW_WORD_OF_THE_DAY` (if Kafka is set up)
   - Sends SSE notification (if SSE is set up)
-- [ ] Configure Spring Scheduling
 - [ ] Handle edge cases (check if word was already created recently)
 
 **Files:**
-- `application/src/main/kotlin/.../scheduler/WordOfTheDayScheduler.kt`
+- `application/src/main/kotlin/.../scheduler/WordRefreshScheduler.kt`
 - `application/src/main/resources/application.yml` (scheduling config)
 
 ---
 
-#### 2. Kafka Setup
+#### 3. Kafka Setup
 
 **Solution Branch:** `solution/phase-3-kafka-setup`
 
@@ -416,7 +435,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 
 ---
 
-#### 3. Server-Sent Events (SSE) Endpoint
+#### 4. Server-Sent Events (SSE) Endpoint
 
 **Solution Branch:** `solution/phase-3-sse-endpoint`
 
@@ -443,7 +462,7 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 
 ---
 
-#### 4. Daily Leaderboard Aggregation (Optional - for participants)
+#### 5. Daily Leaderboard Aggregation (Optional - for participants)
 
 **Solution Branch:** `solution/phase-3-aggregation` (optional)
 
@@ -462,12 +481,13 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 
 ---
 
-#### 5. Complete Phase 3
+#### 6. Complete Phase 3
 
 **Checkpoint Branch:** `solution-complete` (contains everything)
 
 Contains all Phase 3 components combined:
-- Scheduled jobs
+- Daily word scheduler
+- Periodic word refresh
 - Kafka setup (structure)
 - SSE endpoint
 - Daily aggregation (optional)
