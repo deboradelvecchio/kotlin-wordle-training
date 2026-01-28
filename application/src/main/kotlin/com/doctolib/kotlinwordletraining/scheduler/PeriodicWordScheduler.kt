@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnProperty(
-        name = ["scheduler.daily-word.enabled"],
+        name = ["scheduler.periodic-word.enabled"],
         havingValue = "true",
         matchIfMissing = false
 )
-class DailyWordScheduler(private val wordFetcherService: WordFetcherService) {
-    @Scheduled(cron = "0 0 0 * * *")
-    fun generateDailyWord() {
+class PeriodicWordScheduler(private val wordFetcherService: WordFetcherService) {
+    @Scheduled(cron = "0 0 */3 * * *")
+    fun generatePeriodicWord() {
         wordFetcherService.fetchAndSaveNewWord()
     }
 }

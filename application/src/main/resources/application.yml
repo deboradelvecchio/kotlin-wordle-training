@@ -26,3 +26,9 @@ doctoboot:
 wordle:
   # How long a word remains valid (in hours)
   word-validity-hours: 24
+
+scheduler:
+  daily-word:
+    enabled: true
+  periodic-word:
+    enabled: false
