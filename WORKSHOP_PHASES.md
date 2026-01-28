@@ -19,8 +19,8 @@ This document describes the workshop phases and corresponding branches. Each com
   - [3. Complete Phase 2](#3-complete-phase-2)
 - [Phase 3: Scheduled Jobs, Kafka Events, and SSE](#phase-3-scheduled-jobs-kafka-events-and-sse)
   - [1. Scheduled Jobs](#1-scheduled-jobs)
-  - [2. Kafka Setup](#2-kafka-setup)
-  - [3. Server-Sent Events (SSE) Endpoint](#3-server-sent-events-sse-endpoint)
+  - [2. Kafka Event Publisher](#2-kafka-event-publisher)
+  - [3. Kafka Consumer + SSE](#3-kafka-consumer--server-sent-events-sse)
   - [4. Daily Leaderboard Aggregation (Optional)](#4-daily-leaderboard-aggregation-optional---for-participants)
   - [5. Complete Phase 3](#5-complete-phase-3)
 - [Technical Notes](#technical-notes)
@@ -486,18 +486,37 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 This branch combines:
 1. **Kafka Consumer**: Listens to word creation events
 2. **SSE**: Broadcasts events to connected frontend clients
+3. **Frontend Integration**: Named event handling
 
-- [ ] Create `WordEventConsumer`:
-  - `@KafkaListener` on topic `evt.wordle.word`
-  - Receives `WordEvent` (CloudEvents format)
-  - Calls `SseService.broadcast()` to notify clients
+**Backend - Kafka Consumer:**
+- [ ] Configure consumer in `application.yml`:
+  ```yaml
+  spring:
+    kafka:
+      consumer:
+        group-id: wordle-app
+        auto-offset-reset: earliest
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        properties:
+          spring.json.trusted.packages: com.doctolib.kotlinwordletraining.event
+          spring.json.use.type.headers: true
+  ```
+- [ ] Add `jackson-module-kotlin` dependency (required for Kotlin data class deserialization)
+- [ ] Create `WordEventConsumer` with `@KafkaListener`
+
+**Backend - SSE:**
 - [ ] Create `SseService`:
   - `CopyOnWriteArrayList<SseEmitter>` for thread-safe client list
   - `createEmitter()`: Creates new SSE connection with cleanup callbacks
-  - `broadcast(eventName, data)`: Sends to all connected clients
+  - `broadcast(eventName, data)`: Sends **named events** to all clients
 - [ ] Create `SseController`:
   - `GET /api/events/word-of-the-day` returns `SseEmitter`
-  - Content-Type: `text/event-stream`
+  - `@PreAuthorize("permitAll()")` for public access (no auth required)
+
+**Frontend - Named Events:**
+- [ ] Update `useServerSentEvents` hook to support `eventName` parameter
+- [ ] Use `addEventListener` instead of `onmessage` for named events
 
 **Architecture:**
 ```
@@ -505,14 +524,37 @@ Scheduler → Kafka → WordEventConsumer → SseService → Frontend (EventSour
 ```
 
 **Key Concepts:**
+
+**1. Kafka Deserialization with Type Headers:**
+```yaml
+spring.json.use.type.headers: true  # Uses __TypeId__ header for polymorphic deser
+```
+This allows multiple event types on the same topic without hardcoding a default type.
+
+**2. Named vs Unnamed SSE Events:**
+```kotlin
+// Backend sends NAMED event:
+emitter.send(SseEmitter.event().name("NEW_WORD_OF_THE_DAY").data(payload))
+```
+```typescript
+// Frontend MUST use addEventListener for named events:
+eventSource.addEventListener("NEW_WORD_OF_THE_DAY", handler)  // ✅
+eventSource.onmessage = handler  // ❌ Only receives unnamed events
+```
+
+**3. Thread-Safe Client Management:**
 - `SseEmitter(0L)`: Timeout 0 = infinite connection
-- Cleanup callbacks: `onCompletion`, `onTimeout`, `onError` remove disconnected clients
-- `CopyOnWriteArrayList`: Thread-safe for concurrent access
+- `CopyOnWriteArrayList`: Safe for concurrent iteration/modification
+- Cleanup callbacks: `onCompletion`, `onTimeout`, `onError`
 
 **Files:**
 - `application/src/main/kotlin/.../event/WordEventConsumer.kt`
 - `application/src/main/kotlin/.../sse/SseService.kt`
 - `application/src/main/kotlin/.../sse/SseController.kt`
+- `application/pom.xml` (jackson-module-kotlin)
+- `frontend/src/hooks/ui/useServerSentEvents.ts` (eventName support)
+- `frontend/src/hooks/ui/useWordNotifications.ts` (enabled + config)
+- `frontend/src/App.tsx` (hook activation)
 
 ---
 
@@ -600,18 +642,45 @@ git merge solution/phase-2-ranking-algorithm
 
 ```kotlin
 @GetMapping("/events/word-of-the-day", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+@PreAuthorize("permitAll()")  // Public endpoint, no auth required
 fun wordOfTheDayEvents(): SseEmitter {
-    // Create and return SseEmitter
-    // Store in service to broadcast later
+    return sseService.createEmitter()
 }
 ```
 
-**Event Format:**
+**Sending Named Events (Important!):**
+
+```kotlin
+// Backend sends NAMED event with .name()
+emitter.send(
+    SseEmitter.event()
+        .name("NEW_WORD_OF_THE_DAY")  // This makes it a NAMED event
+        .data(mapOf("type" to "NEW_WORD_OF_THE_DAY", "date" to date, "timestamp" to timestamp))
+)
+```
+
+**Frontend Handling Named Events:**
+
+```typescript
+// ❌ WRONG - onmessage only receives UNNAMED events
+eventSource.onmessage = (event) => { ... }
+
+// ✅ CORRECT - addEventListener receives NAMED events
+eventSource.addEventListener("NEW_WORD_OF_THE_DAY", (event) => {
+    const data = JSON.parse(event.data)
+    // handle event
+})
+```
+
+**Event Wire Format:**
 
 ```
-data: {"type":"NEW_WORD_OF_THE_DAY","date":"2026-01-20","timestamp":1737417600}
+event: NEW_WORD_OF_THE_DAY
+data: {"type":"NEW_WORD_OF_THE_DAY","date":"2026-01-28","timestamp":1737417600}
 
 ```
+
+Note: Named events include the `event:` line before `data:`. Without `.name()`, only `data:` is sent.
 
 **When to Send:**
 - When scheduled job generates new word
