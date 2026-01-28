@@ -136,6 +136,8 @@ git cherry-pick solution/phase-1-database-migrations  # Gets just the migrations
 | `solution/phase-1-login` | OAuth2 authentication with Keymock |
 | `solution/phase-2-ranking-algorithm` | RankingService with score calculation |
 | `solution/phase-2-leaderboard-endpoint` | LeaderboardController and Service |
+| `solution/phase-3-scheduled-daily-word` | DailyWordScheduler (midnight) |
+| `solution/phase-3-periodic-word-refresh` | PeriodicWordScheduler (every 3h) + config |
 
 ---
 
