@@ -11,7 +11,8 @@ This document describes the workshop phases and corresponding branches. Each com
   - [3. Word Fetcher Service](#3-word-fetcher-service)
   - [4. Word Verification Algorithm](#4-word-verification-algorithm)
   - [5. API Controllers](#5-api-controllers)
-  - [6. Complete Phase 1](#6-complete-phase-1)
+  - [6. Authentication (Login)](#6-authentication-login)
+  - [7. Complete Phase 1](#7-complete-phase-1)
 - [Phase 2: Leaderboard](#phase-2-leaderboard)
   - [1. Ranking Algorithm](#1-ranking-algorithm)
   - [2. Leaderboard Endpoint](#2-leaderboard-endpoint)
@@ -56,6 +57,7 @@ solution/phase-1-database-migrations → Database schema and migrations
 solution/phase-1-word-fetcher        → External API integration
 solution/phase-1-word-verification   → Word validation algorithm
 solution/phase-1-controllers         → API endpoints
+solution/phase-1-login               → OAuth2 authentication with Keymock
 
 solution/phase-2-ranking-algorithm   → Ranking calculation
 solution/phase-2-leaderboard-endpoint → Leaderboard API
@@ -298,7 +300,38 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 
 ---
 
-#### 6. Complete Phase 1
+#### 6. Authentication (Login)
+
+**Solution Branch:** `solution/phase-1-login`
+
+- [ ] Create `AuthController` with endpoints:
+  - `GET /api/auth/login`: Redirects to Keymock OAuth2 authorization endpoint
+  - `GET /api/auth/callback`: Handles OAuth2 callback, exchanges authorization code for JWT token
+  - `POST /api/auth/logout`: Returns logout success message
+- [ ] Configure OAuth2 flow with Keymock:
+  - Authorization URL: `http://localhost:8880/realms/doctolib-pro/protocol/openid-connect/auth`
+  - Token endpoint: `http://localhost:8880/realms/doctolib-pro/protocol/openid-connect/token`
+  - Client ID: `kotlin-wordle-training`
+- [ ] Frontend integration:
+  - Handle token/error from callback URL parameters in `App.tsx`
+  - Store JWT token in localStorage
+  - Add `Authorization: Bearer <token>` header to all API requests
+  - Update `AuthContext` to check token presence
+  - Implement logout (clear localStorage and redirect)
+
+**Files:**
+- `application/src/main/kotlin/.../controller/AuthController.kt`
+- `frontend/src/App.tsx` (token handling)
+- `frontend/src/api/client.ts` (auth header)
+- `frontend/src/api/wordleApi.ts` (login/logout methods)
+
+**Testing:**
+- Start Keymock: `docker-compose --profile authn up keymock`
+- Use numeric doctoid when authenticating (e.g., `12345`)
+
+---
+
+#### 7. Complete Phase 1
 
 **Checkpoint Branch:** `start-phase-2` (contains all Phase 1)
 
@@ -308,6 +341,7 @@ Contains all Phase 1 components combined:
 - Word fetcher service
 - Word verification algorithm
 - API controllers
+- OAuth2 authentication with Keymock
 
 ---
 

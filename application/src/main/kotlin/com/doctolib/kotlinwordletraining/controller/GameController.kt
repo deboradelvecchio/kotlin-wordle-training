@@ -25,9 +25,9 @@ class GameController(private val gameService: GameService, private val userServi
     fun getGameState(authentication: Authentication?): GameStateResponse {
         return if (authentication != null) {
             val externalId =
-                    extractExternalId(authentication) ?: throw RuntimeException("No external ID")
-            val username = extractUsername(authentication) ?: "unknown"
-            val email = extractEmail(authentication) ?: ""
+                extractExternalId(authentication) ?: throw RuntimeException("No external ID")
+            val username = extractUsername(authentication) ?: externalId
+            val email = extractEmail(authentication) ?: "$externalId@placeholder.local"
             val user = userService.findOrCreate(externalId, username, email)
             gameService.getGameStateAuthenticated(userId = user.id!!)
         } else {
@@ -38,14 +38,14 @@ class GameController(private val gameService: GameService, private val userServi
     @PostMapping("/attempt")
     @PreAuthorize("permitAll()")
     fun submitAttempt(
-            @RequestBody request: AttemptRequest,
-            authentication: Authentication?,
+        @RequestBody request: AttemptRequest,
+        authentication: Authentication?,
     ): AttemptResponse {
         return if (authentication != null) {
             val externalId =
-                    extractExternalId(authentication) ?: throw RuntimeException("No external ID")
-            val username = extractUsername(authentication) ?: "unknown"
-            val email = extractEmail(authentication) ?: ""
+                extractExternalId(authentication) ?: throw RuntimeException("No external ID")
+            val username = extractUsername(authentication) ?: externalId
+            val email = extractEmail(authentication) ?: "$externalId@placeholder.local"
             val user = userService.findOrCreate(externalId, username, email)
 
             gameService.submitAttemptAuthenticated(user.id!!, request.guess)

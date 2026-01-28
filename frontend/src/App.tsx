@@ -1,10 +1,28 @@
-import { Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, useSearchParams, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { Game } from '@pages/Game'
 import { Leaderboard } from '@pages/Leaderboard'
 import './App.css'
 
 function App() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = searchParams.get('token')
+    const error = searchParams.get('error')
+
+    if (token) {
+      localStorage.setItem('auth_token', token)
+      window.location.href = '/'
+    } else if (error) {
+      toast.error(`Login failed: ${error}`)
+      navigate('/', { replace: true })
+    }
+  }, [searchParams, navigate])
+
   return (
     <div className="app">
       <Toaster

@@ -272,18 +272,24 @@ The following endpoints need to be implemented in the backend. All specification
 
 ---
 
-#### 6. `GET /api/auth/login`
+#### 5. Authentication Endpoints
 
-**Status:** ⚠️ Partially implemented (DoctoBoot handles OAuth2)
+**Status:** ✅ Implemented
 
-**Requirements:**
-- Redirects to DoctoBoot OAuth2 provider
-- After login, redirects back to application
-- Sets authentication token/cookie
+**Endpoints:**
+- `GET /api/auth/login` - Redirects to Keymock OAuth2 authorization endpoint
+- `GET /api/auth/callback` - Handles OAuth2 callback, exchanges code for token
+- `POST /api/auth/logout` - Returns logout success message
+
+**Implementation:**
+- OAuth2 Authorization Code flow with Keymock (local OAuth2 provider)
+- Frontend stores JWT token in localStorage
+- All API requests include `Authorization: Bearer <token>` header
+- Frontend handles token/error from callback URL parameters
 
 **Notes:**
-- DoctoBoot should handle most of this automatically
-- May need to configure redirect URLs
+- Keymock runs on `http://localhost:8880` with realm `doctolib-pro`
+- Start Keymock with: `docker-compose --profile authn up keymock`
 
 ---
 
