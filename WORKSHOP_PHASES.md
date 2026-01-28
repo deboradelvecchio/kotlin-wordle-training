@@ -65,7 +65,7 @@ solution/phase-2-leaderboard-endpoint → Leaderboard API
 solution/phase-3-scheduled-daily-word    → Daily midnight word scheduler
 solution/phase-3-periodic-word-refresh   → Periodic (3h) word scheduler + config
 solution/phase-3-kafka-publisher         → Kafka event publisher (CloudEvents)
-solution/phase-3-sse-endpoint            → Server-Sent Events (TODO)
+solution/phase-3-kafka-consumer          → Kafka consumer + SSE real-time notifications
 ```
 
 ### How to Use
@@ -140,6 +140,7 @@ git cherry-pick solution/phase-1-database-migrations  # Gets just the migrations
 | `solution/phase-3-scheduled-daily-word` | DailyWordScheduler (midnight) |
 | `solution/phase-3-periodic-word-refresh` | PeriodicWordScheduler (every 3h) + config |
 | `solution/phase-3-kafka-publisher` | WordEventPublisher with CloudEvents |
+| `solution/phase-3-kafka-consumer` | WordEventConsumer + SSE notifications |
 
 ---
 
@@ -478,30 +479,40 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 
 ---
 
-#### 3. Server-Sent Events (SSE) Endpoint
+#### 3. Kafka Consumer + Server-Sent Events (SSE)
 
-**Solution Branch:** `solution/phase-3-sse-endpoint`
+**Solution Branch:** `solution/phase-3-kafka-consumer`
 
-- [ ] Create SSE endpoint `GET /api/events/word-of-the-day`:
-  - Streams events to connected clients
-  - Event type: `NEW_WORD_OF_THE_DAY`
-  - Event data: `{ type: "NEW_WORD_OF_THE_DAY", date: "2026-01-20", timestamp: 1234567890 }`
-- [ ] Implement SSE controller/service:
-  - Maintain list of connected clients
-  - Broadcast events when new word is generated
-  - Handle client disconnections
-- [ ] Configure CORS for SSE endpoint
-- [ ] Test SSE connection from frontend
+This branch combines:
+1. **Kafka Consumer**: Listens to word creation events
+2. **SSE**: Broadcasts events to connected frontend clients
 
-**Frontend Integration:**
-The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifications` hook implemented. The backend needs to:
-- Accept SSE connections at `/api/events/word-of-the-day`
-- Send `NEW_WORD_OF_THE_DAY` events when scheduled job runs
-- Format events as JSON: `{ type: "NEW_WORD_OF_THE_DAY", date: "YYYY-MM-DD", timestamp: number }`
+- [ ] Create `WordEventConsumer`:
+  - `@KafkaListener` on topic `evt.wordle.word`
+  - Receives `WordEvent` (CloudEvents format)
+  - Calls `SseService.broadcast()` to notify clients
+- [ ] Create `SseService`:
+  - `CopyOnWriteArrayList<SseEmitter>` for thread-safe client list
+  - `createEmitter()`: Creates new SSE connection with cleanup callbacks
+  - `broadcast(eventName, data)`: Sends to all connected clients
+- [ ] Create `SseController`:
+  - `GET /api/events/word-of-the-day` returns `SseEmitter`
+  - Content-Type: `text/event-stream`
+
+**Architecture:**
+```
+Scheduler → Kafka → WordEventConsumer → SseService → Frontend (EventSource)
+```
+
+**Key Concepts:**
+- `SseEmitter(0L)`: Timeout 0 = infinite connection
+- Cleanup callbacks: `onCompletion`, `onTimeout`, `onError` remove disconnected clients
+- `CopyOnWriteArrayList`: Thread-safe for concurrent access
 
 **Files:**
-- `application/src/main/kotlin/.../sse/SseController.kt` or `SseService.kt`
-- `application/src/main/kotlin/.../sse/SseEventBroadcaster.kt`
+- `application/src/main/kotlin/.../event/WordEventConsumer.kt`
+- `application/src/main/kotlin/.../sse/SseService.kt`
+- `application/src/main/kotlin/.../sse/SseController.kt`
 
 ---
 
