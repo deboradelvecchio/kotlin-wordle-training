@@ -57,6 +57,7 @@ services:
       - DATABASE_NAME=kotlin-wordle-training-dev
       - DATABASE_USER=${USER}
       - DATABASE_PASSWORD=
+      - KEYMOCK_INTERNAL_URL=http://keymock:8080
     depends_on:
       - kotlin-wordle-training_postgres
     restart: unless-stopped

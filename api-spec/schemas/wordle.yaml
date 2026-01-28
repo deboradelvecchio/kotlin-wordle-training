@@ -70,7 +70,7 @@ AttemptResponse:
       description: The attempt number (1-6)
       example: 1
     status:
-      $ref: '#/GameStatus'
+      $ref: "#/GameStatus"
       description: Updated game status after this attempt
   required:
     - guess
@@ -82,7 +82,7 @@ GameStateResponse:
   type: object
   properties:
     status:
-      $ref: '#/GameStatus'
+      $ref: "#/GameStatus"
       description: Current game status
     attemptsCount:
       type: integer
@@ -93,7 +93,7 @@ GameStateResponse:
     attempts:
       type: array
       items:
-        $ref: '#/AttemptInfo'
+        $ref: "#/AttemptInfo"
       description: List of previous attempts
     maxAttempts:
       type: integer
@@ -139,7 +139,7 @@ LeaderboardResponse:
     entries:
       type: array
       items:
-        $ref: '#/LeaderboardEntry'
+        $ref: "#/LeaderboardEntry"
       description: Top players in the leaderboard
     currentUserRank:
       type: integer
@@ -154,7 +154,7 @@ SaveGameStateRequest:
     attempts:
       type: array
       items:
-        $ref: '#/AttemptInfo'
+        $ref: "#/AttemptInfo"
       description: All attempts made so far
   required:
     - attempts

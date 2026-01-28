@@ -5,6 +5,7 @@ spring:
 
 keymock:
   http.port: 8880
+  internal.url: ${KEYMOCK_INTERNAL_URL:http://localhost:8880}
 
 # Doctoboot
 doctoboot:
@@ -12,16 +13,15 @@ doctoboot:
     enabled: true
     trusted-issuers:
       - issuer: http://localhost:${keymock.http.port}/realms/doctolib-pro
-        jwks_uri: http://localhost:${keymock.http.port}/realms/doctolib-pro/protocol/openid-connect/certs
+        jwks_uri: ${keymock.internal.url}/realms/doctolib-pro/protocol/openid-connect/certs
       - issuer: http://localhost:${keymock.http.port}/realms/doctolib-patient
-        jwks_uri: http://localhost:${keymock.http.port}/realms/doctolib-patient/protocol/openid-connect/certs
+        jwks_uri: ${keymock.internal.url}/realms/doctolib-patient/protocol/openid-connect/certs
     accepted-clock-skew: 60s
   local-test:
     token-generator.enabled: true
     jwks.enabled: true
   database:
     migration.enabled: false
-
 
 interservice:
   name: kotlin-wordle-training-test
