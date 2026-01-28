@@ -34,25 +34,28 @@ class WordEventPublisher(private val kafkaTemplate: KafkaTemplate<String, WordEv
 
     fun publishNewWord(word: Word) {
         val event =
-            WordEvent(
-                data =
-                    WordEventData(
-                        wordId = word.id ?: throw IllegalStateException("Word ID cannot be null"),
-                        word = word.word,
-                        createdAt = word.createdAt,
-                    )
-            )
+                WordEvent(
+                        data =
+                                WordEventData(
+                                        wordId = word.id
+                                                        ?: throw IllegalStateException(
+                                                                "Word ID cannot be null"
+                                                        ),
+                                        word = word.word,
+                                        createdAt = word.createdAt,
+                                )
+                )
         kafkaTemplate.send(TOPIC, event)
     }
 }
 
 data class WordEvent(
-    val id: String = UUID.randomUUID().toString(),
-    val specversion: String = "1.0",
-    val source: String = WordEventPublisher.EVENT_SOURCE,
-    val type: String = WordEventPublisher.EVENT_TYPE,
-    val time: Instant = Instant.now(),
-    val data: WordEventData,
+        val id: String = UUID.randomUUID().toString(),
+        val specversion: String = "1.0",
+        val source: String = WordEventPublisher.EVENT_SOURCE,
+        val type: String = WordEventPublisher.EVENT_TYPE,
+        val time: Instant = Instant.now(),
+        val data: WordEventData,
 )
 
 data class WordEventData(val wordId: UUID, val word: String, val createdAt: LocalDateTime)
