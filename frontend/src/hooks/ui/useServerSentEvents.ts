@@ -9,6 +9,7 @@ type ServerSentEventMessage = {
 
 type UseServerSentEventsOptions = {
   url: string
+  eventName?: string // If provided, listens for named events instead of default 'message'
   onMessage?: (message: ServerSentEventMessage) => void
   onError?: (error: Event) => void
   onOpen?: () => void
@@ -18,6 +19,7 @@ type UseServerSentEventsOptions = {
 
 export function useServerSentEvents({
   url,
+  eventName,
   onMessage,
   onError,
   onOpen,
@@ -26,11 +28,11 @@ export function useServerSentEvents({
 }: UseServerSentEventsOptions) {
   const [isConnected, setIsConnected] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
-  const optionsRef = useRef({ onMessage, onError, onOpen, onClose, enabled })
+  const optionsRef = useRef({ eventName, onMessage, onError, onOpen, onClose, enabled })
 
   useEffect(() => {
-    optionsRef.current = { onMessage, onError, onOpen, onClose, enabled }
-  }, [onMessage, onError, onOpen, onClose, enabled])
+    optionsRef.current = { eventName, onMessage, onError, onOpen, onClose, enabled }
+  }, [eventName, onMessage, onError, onOpen, onClose, enabled])
 
   const connect = useCallback(() => {
     const options = optionsRef.current
@@ -51,13 +53,20 @@ export function useServerSentEvents({
         options.onOpen?.()
       }
 
-      eventSource.onmessage = event => {
+      const messageHandler = (event: MessageEvent) => {
         try {
           const message = JSON.parse(event.data) as ServerSentEventMessage
           options.onMessage?.(message)
         } catch (error) {
           console.error('Error parsing SSE message:', error)
         }
+      }
+
+      // Use addEventListener for named events, onmessage for default
+      if (options.eventName) {
+        eventSource.addEventListener(options.eventName, messageHandler)
+      } else {
+        eventSource.onmessage = messageHandler
       }
 
       eventSource.onerror = error => {

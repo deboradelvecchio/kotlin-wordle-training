@@ -4,11 +4,15 @@ import { Toaster } from 'react-hot-toast'
 import toast from 'react-hot-toast'
 import { Game } from '@pages/Game'
 import { Leaderboard } from '@pages/Leaderboard'
+import { useWordNotifications } from '@hooks'
 import './App.css'
 
 function App() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+
+  // Listen for new word notifications via SSE
+  useWordNotifications()
 
   useEffect(() => {
     const token = searchParams.get('token')
