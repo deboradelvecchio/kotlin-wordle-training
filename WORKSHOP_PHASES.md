@@ -489,21 +489,24 @@ This branch combines:
 3. **Frontend Integration**: Named event handling
 
 **Backend - Kafka Consumer:**
-- [ ] Configure consumer in `application.yml`:
-  ```yaml
-  spring:
-    kafka:
-      consumer:
-        group-id: wordle-app
-        auto-offset-reset: earliest
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-        properties:
-          spring.json.trusted.packages: com.doctolib.kotlinwordletraining.event
-          spring.json.use.type.headers: true
-  ```
+- [ ] Configure consumer in `application.yml` (see config below)
 - [ ] Add `jackson-module-kotlin` dependency (required for Kotlin data class deserialization)
 - [ ] Create `WordEventConsumer` with `@KafkaListener`
+
+Consumer configuration:
+
+```yaml
+spring:
+  kafka:
+    consumer:
+      group-id: wordle-app
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.doctolib.kotlinwordletraining.event
+        spring.json.use.type.headers: true
+```
 
 **Backend - SSE:**
 - [ ] Create `SseService`:
