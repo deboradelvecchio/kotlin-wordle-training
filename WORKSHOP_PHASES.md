@@ -11,18 +11,18 @@ This document describes the workshop phases and corresponding branches. Each com
   - [3. Word Fetcher Service](#3-word-fetcher-service)
   - [4. Word Verification Algorithm](#4-word-verification-algorithm)
   - [5. API Controllers](#5-api-controllers)
-  - [6. Complete Phase 1](#6-complete-phase-1)
+  - [6. Authentication (Login)](#6-authentication-login)
+  - [7. Complete Phase 1](#7-complete-phase-1)
 - [Phase 2: Leaderboard](#phase-2-leaderboard)
   - [1. Ranking Algorithm](#1-ranking-algorithm)
   - [2. Leaderboard Endpoint](#2-leaderboard-endpoint)
   - [3. Complete Phase 2](#3-complete-phase-2)
 - [Phase 3: Scheduled Jobs, Kafka Events, and SSE](#phase-3-scheduled-jobs-kafka-events-and-sse)
-  - [1. Daily Word Scheduler](#1-daily-word-scheduler)
-  - [2. Periodic Word Refresh](#2-periodic-word-refresh)
-  - [3. Kafka Setup](#3-kafka-setup)
-  - [4. Server-Sent Events (SSE) Endpoint](#4-server-sent-events-sse-endpoint)
-  - [5. Daily Leaderboard Aggregation (Optional)](#5-daily-leaderboard-aggregation-optional---for-participants)
-  - [6. Complete Phase 3](#6-complete-phase-3)
+  - [1. Scheduled Jobs](#1-scheduled-jobs)
+  - [2. Kafka Setup](#2-kafka-setup)
+  - [3. Server-Sent Events (SSE) Endpoint](#3-server-sent-events-sse-endpoint)
+  - [4. Daily Leaderboard Aggregation (Optional)](#4-daily-leaderboard-aggregation-optional---for-participants)
+  - [5. Complete Phase 3](#5-complete-phase-3)
 - [Technical Notes](#technical-notes)
   - [Decisions Made](#decisions-made)
   - [Branch Usage Strategy](#branch-usage-strategy)
@@ -57,14 +57,14 @@ solution/phase-1-database-migrations → Database schema and migrations
 solution/phase-1-word-fetcher        → External API integration
 solution/phase-1-word-verification   → Word validation algorithm
 solution/phase-1-controllers         → API endpoints
+solution/phase-1-login               → OAuth2 authentication with Keymock
 
-solution/phase-2-ranking-algorithm     → Ranking calculation
-solution/phase-2-leaderboard-endpoint  → Leaderboard API
+solution/phase-2-ranking-algorithm   → Ranking calculation
+solution/phase-2-leaderboard-endpoint → Leaderboard API
 
-solution/phase-3-scheduled-daily-word  → Daily word generation at midnight
-solution/phase-3-scheduled-jobs        → Periodic word refresh (every 3 hours)
-solution/phase-3-kafka-setup           → Kafka producer configuration
-solution/phase-3-sse-endpoint          → Server-Sent Events
+solution/phase-3-scheduled-jobs      → Scheduled word generation
+solution/phase-3-kafka-setup         → Kafka producer configuration
+solution/phase-3-sse-endpoint        → Server-Sent Events
 ```
 
 ### How to Use
@@ -110,18 +110,32 @@ git checkout -b my-kafka-implementation start-phase-3
 # Implement only Kafka/SSE
 ```
 
-**Mix and match:**
+**Mix and match with cherry-pick:**
+
+Each solution branch has exactly ONE commit, making cherry-pick clean and easy:
 
 ```bash
 # Create your own branch from start-phase-1
 git checkout -b my-wordle-implementation start-phase-1
 
-# Merge solutions for parts you want to skip
-git merge solution/phase-1-user-entity
-git merge solution/phase-1-database-migrations
+# Cherry-pick only the solutions you want to skip
+git cherry-pick solution/phase-1-user-entity      # Gets just the User entity commit
+git cherry-pick solution/phase-1-database-migrations  # Gets just the migrations commit
 
-# Now implement only word-fetcher, word-verification, and controllers yourself
+# Now implement word-fetcher, word-verification, and controllers yourself
 ```
+
+**Available commits to cherry-pick:**
+| Branch | Commit Description |
+|--------|-------------------|
+| `solution/phase-1-user-entity` | User entity, repository, and service |
+| `solution/phase-1-database-migrations` | Word, GameState, GameAttempt entities |
+| `solution/phase-1-word-fetcher` | WordFetcherService with external API |
+| `solution/phase-1-word-verification` | WordVerificationService with feedback |
+| `solution/phase-1-controllers` | GameController and GameService |
+| `solution/phase-1-login` | OAuth2 authentication with Keymock |
+| `solution/phase-2-ranking-algorithm` | RankingService with score calculation |
+| `solution/phase-2-leaderboard-endpoint` | LeaderboardController and Service |
 
 ---
 
@@ -300,7 +314,38 @@ Since we use OAuth2 (Keymock) for authentication, you might wonder if we need a 
 
 ---
 
-#### 6. Complete Phase 1
+#### 6. Authentication (Login)
+
+**Solution Branch:** `solution/phase-1-login`
+
+- [ ] Create `AuthController` with endpoints:
+  - `GET /api/auth/login`: Redirects to Keymock OAuth2 authorization endpoint
+  - `GET /api/auth/callback`: Handles OAuth2 callback, exchanges authorization code for JWT token
+  - `POST /api/auth/logout`: Returns logout success message
+- [ ] Configure OAuth2 flow with Keymock:
+  - Authorization URL: `http://localhost:8880/realms/doctolib-pro/protocol/openid-connect/auth`
+  - Token endpoint: `http://localhost:8880/realms/doctolib-pro/protocol/openid-connect/token`
+  - Client ID: `kotlin-wordle-training`
+- [ ] Frontend integration:
+  - Handle token/error from callback URL parameters in `App.tsx`
+  - Store JWT token in localStorage
+  - Add `Authorization: Bearer <token>` header to all API requests
+  - Update `AuthContext` to check token presence
+  - Implement logout (clear localStorage and redirect)
+
+**Files:**
+- `application/src/main/kotlin/.../controller/AuthController.kt`
+- `frontend/src/App.tsx` (token handling)
+- `frontend/src/api/client.ts` (auth header)
+- `frontend/src/api/wordleApi.ts` (login/logout methods)
+
+**Testing:**
+- Start Keymock: `docker-compose --profile authn up keymock`
+- Use numeric doctoid when authenticating (e.g., `12345`)
+
+---
+
+#### 7. Complete Phase 1
 
 **Checkpoint Branch:** `start-phase-2` (contains all Phase 1)
 
@@ -310,6 +355,7 @@ Contains all Phase 1 components combined:
 - Word fetcher service
 - Word verification algorithm
 - API controllers
+- OAuth2 authentication with Keymock
 
 ---
 
@@ -378,43 +424,26 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 
 ### Components
 
-#### 1. Daily Word Scheduler
-
-**Solution Branch:** `solution/phase-3-scheduled-daily-word`
-
-- [ ] Enable Spring Scheduling with `@EnableScheduling`
-- [ ] Create `@Scheduled` job that:
-  - Runs every day at midnight (`cron = "0 0 0 * * *"`)
-  - Calls external API for new word
-  - Saves new word in database with `created_at` timestamp
-- [ ] Refactor `WordFetcherService.getCurrentWord()` to NOT auto-generate on first call
-- [ ] Add `fetchAndSaveNewWord()` method to `WordFetcherService`
-
-**Files:**
-- `application/src/main/kotlin/.../scheduler/DailyWordScheduler.kt`
-- `application/src/main/kotlin/.../KotlinWordleTrainingApplication.kt` (add @EnableScheduling)
-
----
-
-#### 2. Periodic Word Refresh
+#### 1. Scheduled Jobs
 
 **Solution Branch:** `solution/phase-3-scheduled-jobs`
 
 - [ ] Create `@Scheduled` job that:
-  - Runs every 3 hours (`cron = "0 0 */3 * * *"`)
+  - Runs every 3 hours
   - Calls external API for new word
   - Saves new word in database with `created_at` timestamp
   - Publishes Kafka event `NEW_WORD_OF_THE_DAY` (if Kafka is set up)
   - Sends SSE notification (if SSE is set up)
+- [ ] Configure Spring Scheduling
 - [ ] Handle edge cases (check if word was already created recently)
 
 **Files:**
-- `application/src/main/kotlin/.../scheduler/WordRefreshScheduler.kt`
+- `application/src/main/kotlin/.../scheduler/WordOfTheDayScheduler.kt`
 - `application/src/main/resources/application.yml` (scheduling config)
 
 ---
 
-#### 3. Kafka Setup
+#### 2. Kafka Setup
 
 **Solution Branch:** `solution/phase-3-kafka-setup`
 
@@ -435,7 +464,7 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 
 ---
 
-#### 4. Server-Sent Events (SSE) Endpoint
+#### 3. Server-Sent Events (SSE) Endpoint
 
 **Solution Branch:** `solution/phase-3-sse-endpoint`
 
@@ -462,7 +491,7 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 
 ---
 
-#### 5. Daily Leaderboard Aggregation (Optional - for participants)
+#### 4. Daily Leaderboard Aggregation (Optional - for participants)
 
 **Solution Branch:** `solution/phase-3-aggregation` (optional)
 
@@ -481,13 +510,12 @@ The frontend already has `useServerSentEvents` hook and `useWordOfTheDayNotifica
 
 ---
 
-#### 6. Complete Phase 3
+#### 5. Complete Phase 3
 
 **Checkpoint Branch:** `solution-complete` (contains everything)
 
 Contains all Phase 3 components combined:
-- Daily word scheduler
-- Periodic word refresh
+- Scheduled jobs
 - Kafka setup (structure)
 - SSE endpoint
 - Daily aggregation (optional)
