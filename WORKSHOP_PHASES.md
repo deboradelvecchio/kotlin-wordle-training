@@ -62,9 +62,10 @@ solution/phase-1-login               → OAuth2 authentication with Keymock
 solution/phase-2-ranking-algorithm   → Ranking calculation
 solution/phase-2-leaderboard-endpoint → Leaderboard API
 
-solution/phase-3-scheduled-jobs      → Scheduled word generation
-solution/phase-3-kafka-setup         → Kafka producer configuration
-solution/phase-3-sse-endpoint        → Server-Sent Events
+solution/phase-3-scheduled-daily-word    → Daily midnight word scheduler
+solution/phase-3-periodic-word-refresh   → Periodic (3h) word scheduler + config
+solution/phase-3-kafka-publisher         → Kafka event publisher (CloudEvents)
+solution/phase-3-sse-endpoint            → Server-Sent Events (TODO)
 ```
 
 ### How to Use
@@ -138,6 +139,7 @@ git cherry-pick solution/phase-1-database-migrations  # Gets just the migrations
 | `solution/phase-2-leaderboard-endpoint` | LeaderboardController and Service |
 | `solution/phase-3-scheduled-daily-word` | DailyWordScheduler (midnight) |
 | `solution/phase-3-periodic-word-refresh` | PeriodicWordScheduler (every 3h) + config |
+| `solution/phase-3-kafka-publisher` | WordEventPublisher with CloudEvents |
 
 ---
 
@@ -445,24 +447,34 @@ Implement scheduled jobs for automatic word management, Kafka event publishing, 
 
 ---
 
-#### 2. Kafka Setup
+#### 2. Kafka Event Publisher
 
-**Solution Branch:** `solution/phase-3-kafka-setup`
+**Solution Branch:** `solution/phase-3-kafka-publisher`
 
-- [ ] Add Kafka dependencies to `pom.xml`
-- [ ] Configure Kafka producer
-- [ ] Create event model `WordOfTheDayEvent`:
-  - word, date, timestamp
-- [ ] Add Kafka to `docker-compose.yml`
-- [ ] Test event publishing
+- [ ] Add `spring-kafka` dependency to `pom.xml`
+- [ ] Configure Kafka producer in `application.yml`:
+  - `bootstrap-servers: localhost:9092`
+  - `key-serializer: StringSerializer`
+  - `value-serializer: JsonSerializer`
+- [ ] Create `WordEventPublisher` following CloudEvents specification:
+  - Event type: `evt.wordle.word.created`
+  - Event source: `doctolib://kotlin-wordle-training`
+  - Topic: `evt.wordle.word`
+- [ ] Create event models `WordEvent` and `WordEventData`
+- [ ] Add Kafka and Zookeeper to `docker-compose.yml`
+- [ ] Integrate publisher into schedulers
 
-**Note:** Kafka implementation will be done by workshop participants, but the structure should be prepared.
+**CloudEvents Naming Convention (Doctolib standard):**
+- type: `evt.<domain>.<entity>.<action>` (e.g., `evt.wordle.word.created`)
+- source: `doctolib://<app-name>`
+- topic: `evt.<domain>.<entity>` (type without action)
+
+**Note:** In production, Doctolib uses the Outbox Pattern with Avro serialization (see `doctoboot-outbox` module). For this workshop, we use a simpler direct `KafkaTemplate` approach with JSON.
 
 **Files:**
-- `application/src/main/kotlin/.../event/WordOfTheDayEvent.kt`
-- `application/src/main/kotlin/.../configuration/KafkaConfiguration.kt`
-- `application/src/main/kotlin/.../producer/WordOfTheDayEventProducer.kt`
-- `docker-compose.yml` (Kafka service)
+- `application/src/main/kotlin/.../event/WordEventPublisher.kt`
+- `application/src/main/resources/application.yml` (Kafka config)
+- `docker-compose.yml` (Kafka + Zookeeper services)
 
 ---
 
