@@ -10,6 +10,11 @@ spring:
     allow-bean-definition-overriding: false
   liquibase:
     change-log: classpath:db/db-changelog.xml
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 # Actuators
 management:
