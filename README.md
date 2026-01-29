@@ -17,19 +17,46 @@ installed to fetch various artifacts
 
 #### Java Environment
 
-##### Install Java 21
+## Setting up your Java environment
+
+1. Install [JEnv](https://github.com/jenv/jenv) to manage your java environment
+
+```shell
+brew install jenv
+```
+
+Edit your .zshrc or .profile as requested by jenv (see `brew info jenv`)
+
+To activate jenv, add the following to your shell profile e.g. ~/.profile or ~/.zshrc:
+
+```shell
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
+```
+
+Make sure to open a new shell once jenv is installed
+
+2. Install OpenJDK 21
 
 ```shell
 brew install openjdk@21
 ```
 
-##### Install Kotlin 2.0.0
+3. Configure JEnv to use OpenJDK 21
 
 ```shell
-brew install kotlin@2.0.0
+jenv add <path to openjdk 21>
 ```
 
-##### 7 - Setup Git Hooks
+For example:
+
+```shell
+jenv add /opt/homebrew/opt/openjdk@21
+-or-
+jenv add /usr/local/opt/openjdk@21
+```
+
+##### Setup Git Hooks
 
 Configure git to use the project's git hooks (for automatic code formatting):
 
@@ -37,7 +64,7 @@ Configure git to use the project's git hooks (for automatic code formatting):
 git config core.hooksPath scripts/git-hooks
 ```
 
-##### 8 - First Build
+##### First Build
 
 Ensure you have the latest maven settings for your workstation:
 
