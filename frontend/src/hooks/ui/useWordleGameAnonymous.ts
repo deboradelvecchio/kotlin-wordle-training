@@ -27,7 +27,9 @@ export function useWordleGameAnonymous() {
   }, [todayDate])
 
   // Use state instead of useMemo to enable re-renders
-  const [attempts, setAttempts] = useState<Attempt[]>(initialState.attempts || [])
+  const [attempts, setAttempts] = useState<Attempt[]>(
+    initialState.attempts || []
+  )
   const [gameState, setGameState] = useState<GameState>(
     initialState.gameState || 'not_started'
   )
@@ -62,10 +64,10 @@ export function useWordleGameAnonymous() {
         onSuccess: data => {
           // Convert backend format to frontend format
           const feedbackArray = parseFeedback(data.guess, data.feedback)
-          
+
           // Calculate attempt number locally (backend returns 0 for anonymous)
           const attemptNumber = attempts.length + 1
-          
+
           const newGameState: GameState = isCorrectAnswer(data.feedback)
             ? 'won'
             : attemptNumber >= 6
@@ -85,7 +87,9 @@ export function useWordleGameAnonymous() {
           setCurrentWord('')
 
           // Save to localStorage
-          const state = getLocalStorageGameState(todayDate) || createEmptyGameState(todayDate)
+          const state =
+            getLocalStorageGameState(todayDate) ||
+            createEmptyGameState(todayDate)
           state.attempts = newAttempts
           state.gameState = newGameState
           state.currentWord = ''

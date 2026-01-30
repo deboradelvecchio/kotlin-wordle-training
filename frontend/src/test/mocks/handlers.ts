@@ -13,7 +13,7 @@ export const handlers = [
       status: 'ok',
       service: 'kotlin-wordle-training',
     })
-  }), 
+  }),
 
   http.post(`${API_BASE_URL}/attempt`, async ({ request }) => {
     const body = (await request.json()) as { guess: string }
