@@ -22,3 +22,7 @@ doctoboot:
   # enforce endpoints authorization (through Pre/PostAuthorize annotations)
   security.authorization.enforcement.throw: true
 
+# Wordle game configuration
+wordle:
+  # How long a word remains valid (in hours)
+  word-validity-hours: 24
