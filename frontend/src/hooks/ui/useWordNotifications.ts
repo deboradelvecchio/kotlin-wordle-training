@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useServerSentEvents } from './useServerSentEvents'
 
-const SSE_URL = 'http://localhost:8080/kotlin-wordle-training/api/events/new-word'
+const SSE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080/kotlin-wordle-training/api'}/events/new-word`
 
 /**
  * Hook to listen for new word notifications via Server-Sent Events.
