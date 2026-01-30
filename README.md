@@ -168,47 +168,174 @@ API models are defined manually in both backend and frontend:
 
 The OpenAPI specification in `api-spec/` serves as documentation and reference, but models are maintained manually to keep full control over the code.
 
-## Workshop Structure
+## Project Status
 
-This project is organized into phases for the workshop. Each phase has its own branch with incremental implementation.
+### ✅ What's Done
 
-**📖 See [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md) for complete details on:**
-- Branch structure and naming
-- Implementation phases and requirements
-- Database schema
-- API specifications
+#### Frontend
 
-### Phases Overview
+- ✅ React + TypeScript + Vite setup
+- ✅ React Router for navigation
+- ✅ React Query for API calls
+- ✅ Wordle game UI (Board, Keyboard, Game components)
+- ✅ Authentication context (Context API)
+- ✅ Game state management:
+  - Anonymous users: localStorage-based
+  - Authenticated users: API-based
+- ✅ Automatic state migration when user logs in
+- ✅ Docker Compose integration with hot reload
 
-- **Phase 1**: Base game functionality (User entity, Database, Word fetcher, Word verification, Controllers, Authentication)
+#### Backend
+
+- ✅ Health check endpoint (`GET /api/health`)
+- ✅ CORS configuration
+- ✅ Spring Security configuration
+- ✅ DoctoBoot OAuth2 setup
+
+### 🚧 Backend API Implementation (TODO)
+
+The following endpoints need to be implemented in the backend. All specifications are in `api-spec/openapi.yaml`.
+
+**📖 For detailed implementation phases and branch structure, see [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md)**
+
+#### 1. `POST /api/attempt`
+
+**Status:** ❌ Not implemented
+
+**Requirements:**
+- Accepts `AttemptRequest` with a 5-letter word
+- Validates word exists in dictionary (5 letters, valid word)
+- Calculates feedback for each letter:
+- `correct`: letter is in correct position
+- `present`: letter is in word but wrong position
+- `absent`: letter is not in word
+- **If authenticated:**
+- Save attempt to database
+- Update game state
+- If game is won: return `solvedWord` in response
+- Return `attempts` array in response (to avoid extra API call)
+- **If NOT authenticated:**
+- Only validate word and return feedback
+- Do not save anything
+- Do not return `solvedWord` or `attempts`
+
+**Response Schema:** `AttemptResponse`
+
+**Error Cases:**
+- `400`: Invalid word (not 5 letters or not in dictionary)
+- `422`: Game already finished or no attempts remaining (max 6 attempts)
+
+**Security Notes:**
+- The word is never returned to the client - it's only used server-side to validate attempts
+- Word validation logic: check if word exists in a dictionary
+- Feedback calculation: compare attempted word with current word
+- Game ends when: word is correct (won) or 6 attempts used (lost)
+
+---
+
+#### 2. `GET /api/game-state`
+
+**Status:** ❌ Not implemented
+
+**Requirements:**
+- **Requires authentication** (returns 401 if not authenticated)
+- Returns current game state for authenticated user
+- Includes all attempts made so far
+- Includes date (but NOT the word itself for security)
+
+**Response Schema:** `GameStateResponse`
+
+**Security:**
+- Must check authentication token
+- Return only current user's game state
+- **Never return the word** - it's only used server-side
+
+---
+
+#### 3. `POST /api/game-state`
+
+**Status:** ❌ Not implemented
+
+**Requirements:**
+- **Requires authentication** (returns 401 if not authenticated)
+- Accepts `SaveGameStateRequest` with attempts array and date
+- Saves game state from localStorage when user logs in
+- Transfers anonymous attempts to authenticated user
+- Only saves if date matches current word date
+
+**Request Schema:** `SaveGameStateRequest`
+
+**Response:** `200 OK` (no body)
+
+**Security:**
+- Must check authentication token
+- Only save for authenticated user
+
+---
+
+#### 4. `GET /api/leaderboard`
+
+**Status:** ❌ Not implemented
+
+**Requirements:**
+- **Requires authentication** (returns 401 if not authenticated)
+- Returns leaderboard with top players
+- Each entry includes:
+- `username`
+- `attempts` (number of attempts used)
+- `solveTimeSeconds` (time to solve in seconds)
+- `rank` (position in leaderboard)
+- Optionally includes `currentUserRank` if user is in leaderboard
+
+**Response Schema:** `LeaderboardResponse`
+
+**Ranking Logic:**
+- Backend decides ranking algorithm (combines attempts and solve time)
+- Example: fewer attempts = better, faster solve time = better
+- Algorithm is up to backend implementation
+
+**Security:**
+- Must check authentication token
+
+---
+
+#### 6. `GET /api/auth/login`
+
+**Status:** ⚠️ Partially implemented (DoctoBoot handles OAuth2)
+
+**Requirements:**
+- Redirects to DoctoBoot OAuth2 provider
+- After login, redirects back to application
+- Sets authentication token/cookie
+
+**Notes:**
+- DoctoBoot should handle most of this automatically
+- May need to configure redirect URLs
+
+---
+
+### Implementation Notes
+
+1. **Word Dictionary**: You'll need a dictionary of valid 5-letter words for validation
+2. **Word Selection**: Words are fetched from `https://random-word-api.herokuapp.com/word?length=5`
+3. **Security**: The word is **never** returned to the client - it's only stored server-side and used to validate attempts
+4. **Authentication**: Use DoctoBoot's authentication mechanisms to check if user is authenticated
+5. **Database**:
+   - User entity with `external_id` from JWT `sub` claim
+   - Word entity with `created_at` timestamp (most recent word is current)
+   - GameState and GameAttempt entities for tracking game progress
+   - See [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md) for detailed schema
+6. **Error Handling**: Return appropriate HTTP status codes and error messages
+
+### Workshop Structure
+
+This project is organized into phases for the workshop. Each phase has its own branch with specific components:
+
+- **Phase 1**: Base game functionality (User entity, Database, Word fetcher, Word verification, Controllers)
 - **Phase 2**: Leaderboard (Ranking algorithm, Leaderboard endpoint)
-- **Phase 3**: Scheduled jobs, Kafka, and SSE
+- **Phase 3**: Scheduled jobs, Kafka, and SSE (Scheduled word generation, Kafka events, Server-Sent Events)
 
-## Configuration Files
-
-⚠️ **Important**: Some configuration files are not committed for security reasons:
-- `.env` files
-- Application properties with sensitive values
-
-**Contact the workshop organizer to get these files before starting.**
-
-## Running with Authentication
-
-To run the full stack with Keymock (OAuth2 provider):
-
-```bash
-# Start all services including Keymock
-docker-compose --profile authn up
-
-# Or in detached mode
-docker-compose --profile authn up -d
-```
-
-**Services:**
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:8080/kotlin-wordle-training
-- **Keymock**: http://localhost:8880
-- **Database**: localhost:55432
+See [WORKSHOP_PHASES.md](./WORKSHOP_PHASES.md) for complete details on branch structure and implementation phases.
 
 ### Useful Links
 
