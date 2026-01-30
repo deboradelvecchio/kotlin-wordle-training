@@ -20,11 +20,7 @@ class UserService(private val userRepository: UserRepository) {
         return externalId?.let { userRepository.findByExternalId(it) }
     }
 
-    // fun getCurrentUser(): User? {
-    //     val authentication = SecurityContextHolder.getContext().authentication
-    //     val externalId = authentication?.name
-    //     if (externalId != null) {
-    //         return userRepository.findByExternalId(externalId)
-    //     }
-    //     return null
+    fun find(externalId: String): User? {
+        return userRepository.findByExternalId(externalId)
+    }
 }
