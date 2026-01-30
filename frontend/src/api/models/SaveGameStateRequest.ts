@@ -1,4 +1,4 @@
-import type { Attempt } from './WordOfTheDayResponse'
+import type { Attempt } from './types'
 
 export type SaveGameStateRequest = {
   attempts: Attempt[]
