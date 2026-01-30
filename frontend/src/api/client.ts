@@ -5,6 +5,13 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || '/kotlin-wordle-training/api'
 
+const AUTH_TOKEN_KEY = 'auth_token'
+
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY)
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 /**
  * Generic fetch wrapper with error handling
  * Assumes all responses are JSON
@@ -19,6 +26,7 @@ async function apiFetch<T>(
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders(),
       ...options?.headers,
     },
   })

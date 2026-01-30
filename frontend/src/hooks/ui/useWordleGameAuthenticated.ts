@@ -14,42 +14,61 @@ export function useWordleGameAuthenticated() {
   const [localAttempts, setLocalAttempts] = useState<
     Array<{
       word: string
-      feedback: Array<{ letter: string; status: 'correct' | 'present' | 'absent' }>
+      feedback: Array<{
+        letter: string
+        status: 'correct' | 'present' | 'absent'
+      }>
       attemptNumber: number
     }>
   >([])
   const [localGameState, setLocalGameState] = useState<GameState>('not_started')
 
-  // Convert backend status to frontend GameState
-  const gameState = useMemo<GameState>(() => {
-    if (localGameState !== 'not_started') {
-      return localGameState
-    }
-    if (!gameStateData) {
-      return 'not_started'
-    }
-    const status = gameStateData.status
-    if (status === 'NOT_STARTED') return 'not_started'
-    if (status === 'IN_PROGRESS') return 'in_progress'
-    if (status === 'WON') return 'won'
-    if (status === 'LOST') return 'lost'
-    return 'not_started'
-  }, [gameStateData, localGameState])
-
   // Convert backend attempts to frontend format
-  const attempts = useMemo(() => {
-    if (localAttempts.length > 0) {
-      return localAttempts
-    }
-    if (!gameStateData?.attempts) {
-      return []
-    }
-    return gameStateData.attempts.map((a, index) => ({
+  // Use local attempts only if they extend server state (for optimistic updates)
+  const { attempts, isUsingLocalState } = useMemo(() => {
+    const serverAttempts = gameStateData?.attempts ?? []
+    const serverFormatted = serverAttempts.map((a, index) => ({
       word: a.guess,
       feedback: parseFeedback(a.guess, a.feedback),
       attemptNumber: index + 1,
     }))
+
+    // If local attempts exist and are consistent with server (same prefix), use local
+    // This allows optimistic updates while preventing stale data after user change
+    if (
+      localAttempts.length > 0 &&
+      localAttempts.length >= serverFormatted.length
+    ) {
+      const isConsistent = serverFormatted.every(
+        (serverAttempt, i) => localAttempts[i]?.word === serverAttempt.word
+      )
+      if (isConsistent) {
+        return { attempts: localAttempts, isUsingLocalState: true }
+      }
+    }
+
+    return { attempts: serverFormatted, isUsingLocalState: false }
   }, [gameStateData, localAttempts])
+
+  // Convert backend status to frontend GameState
+  const gameState = useMemo<GameState>(() => {
+    const serverState = (() => {
+      if (!gameStateData) return 'not_started'
+      const status = gameStateData.status
+      if (status === 'NOT_STARTED') return 'not_started' as GameState
+      if (status === 'IN_PROGRESS') return 'in_progress' as GameState
+      if (status === 'WON') return 'won' as GameState
+      if (status === 'LOST') return 'lost' as GameState
+      return 'not_started' as GameState
+    })()
+
+    // Only use local state if we're also using local attempts (optimistic update)
+    if (localGameState !== 'not_started' && isUsingLocalState) {
+      return localGameState
+    }
+
+    return serverState
+  }, [gameStateData, localGameState, isUsingLocalState])
 
   const handleLetterInput = useCallback(
     (letter: string) => {

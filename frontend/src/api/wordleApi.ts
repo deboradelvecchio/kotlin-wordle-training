@@ -6,6 +6,8 @@ import type { GameStateResponse } from './models/GameStateResponse'
 import type { LeaderboardResponse } from './models/LeaderboardResponse'
 import type { SaveGameStateRequest } from './models/SaveGameStateRequest'
 
+const BACKEND_URL = 'http://localhost:8080/kotlin-wordle-training'
+
 export const wordleApi = {
   getHealth: () => get<HealthResponse>('/health'),
   attemptWord: (request: AttemptRequest) =>
@@ -15,6 +17,10 @@ export const wordleApi = {
   saveGameState: (request: SaveGameStateRequest) =>
     post<void>('/game-state', request),
   login: () => {
-    window.location.href = '/kotlin-wordle-training/api/auth/login'
+    window.location.href = `${BACKEND_URL}/api/auth/login`
+  },
+  logout: () => {
+    localStorage.removeItem('auth_token')
+    window.location.href = '/'
   },
 }

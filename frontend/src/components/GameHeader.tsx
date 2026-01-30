@@ -5,13 +5,11 @@ type GameHeaderProps = {
   isAuthenticated: boolean
 }
 
-const LOGOUT_URL = '/kotlin-wordle-training/api/auth/logout'
-
 export function GameHeader({ isAuthenticated }: GameHeaderProps) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    window.location.href = LOGOUT_URL
+    wordleApi.logout()
   }
 
   const handleLogin = () => {
