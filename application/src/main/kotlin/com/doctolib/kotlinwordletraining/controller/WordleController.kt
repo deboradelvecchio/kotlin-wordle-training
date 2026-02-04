@@ -3,7 +3,7 @@ package com.doctolib.kotlinwordletraining.controller
 import com.doctolib.kotlinwordletraining.model.AttemptRequest
 import com.doctolib.kotlinwordletraining.model.AttemptResponse
 import com.doctolib.kotlinwordletraining.service.GameService
-import com.doctolib.kotlinwordletraining.service.UserUtils
+import com.doctolib.kotlinwordletraining.service.JwtUtils
 import com.doctolib.kotlinwordletraining.service.WordFetcherService
 import com.doctolib.kotlinwordletraining.service.WordVerificationService
 import org.springframework.http.HttpStatus
@@ -20,12 +20,13 @@ class WordleController(
     private val wordVerificationService: WordVerificationService,
     private val wordFetcherService: WordFetcherService,
     private val gameService: GameService,
+    private val jwtUtils: JwtUtils,
 ) {
     @PostMapping("/attempt")
     @PreAuthorize("permitAll()")
     fun sendAttempt(@RequestBody request: AttemptRequest): AttemptResponse {
         val userId =
-            UserUtils.getExternalId()
+            jwtUtils.getExternalId()
                 ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User ID not found")
 
         val validationResult = wordVerificationService.validate(request.guess)

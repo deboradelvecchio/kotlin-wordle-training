@@ -5,28 +5,22 @@ import com.doctolib.kotlinwordletraining.entity.GameStatus
 import com.doctolib.kotlinwordletraining.entity.Word
 import com.doctolib.kotlinwordletraining.model.AttemptRequest
 import com.doctolib.kotlinwordletraining.service.GameService
+import com.doctolib.kotlinwordletraining.service.JwtUtils
 import com.doctolib.kotlinwordletraining.service.LetterFeedback
-import com.doctolib.kotlinwordletraining.service.UserUtils
 import com.doctolib.kotlinwordletraining.service.ValidationResult
 import com.doctolib.kotlinwordletraining.service.WordFetcherService
 import com.doctolib.kotlinwordletraining.service.WordVerificationService
-import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.MockedStatic
-import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.eq
 import org.springframework.web.server.ResponseStatusException
 
-@Ignore
 @ExtendWith(MockitoExtension::class)
 class WordleControllerTest {
 
@@ -36,44 +30,23 @@ class WordleControllerTest {
 
     @Mock private lateinit var gameService: GameService
 
+    @Mock private lateinit var jwtUtils: JwtUtils
+
     @Mock private lateinit var mockWord: Word
 
     @Mock private lateinit var mockGameState: GameState
 
     private lateinit var wordleController: WordleController
-    private lateinit var userUtilsMock: MockedStatic<UserUtils>
 
     @BeforeEach
     fun setup() {
         wordleController =
-            WordleController(wordVerificationService, wordFetcherService, gameService)
-
-        `when`(mockWord.word).thenReturn("HELLO")
-        `when`(mockWord.gameDate).thenReturn(LocalDate.now())
-
-        // Setup static mock for UserUtils
-        userUtilsMock = mockStatic(UserUtils::class.java)
-        `when`(UserUtils.getExternalId()).thenReturn("user123")
-    }
-
-    @AfterEach
-    fun tearDown() {
-        userUtilsMock.close()
-    }
-
-    @Test
-    fun `sendAttempt returns 401 when user is not authenticated`() {
-        val request = AttemptRequest("WORLD")
-
-        val exception =
-            assertThrows<ResponseStatusException> { wordleController.sendAttempt(request) }
-
-        assertThat(exception.statusCode.value()).isEqualTo(401)
-        assertThat(exception.reason).isEqualTo("User not authenticated")
+            WordleController(wordVerificationService, wordFetcherService, gameService, jwtUtils)
     }
 
     @Test
     fun `sendAttempt returns 400 when guess is invalid`() {
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
         `when`(wordVerificationService.validate("WOR"))
             .thenReturn(ValidationResult(false, "Word must be 5 letters"))
 
@@ -88,6 +61,7 @@ class WordleControllerTest {
 
     @Test
     fun `sendAttempt returns 400 when guess contains non-letters`() {
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
         `when`(wordVerificationService.validate("WOR12"))
             .thenReturn(ValidationResult(false, "Word must contain only letters"))
 
@@ -102,6 +76,7 @@ class WordleControllerTest {
 
     @Test
     fun `sendAttempt returns 400 when word not in dictionary`() {
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
         `when`(wordVerificationService.validate("ZZZZZ"))
             .thenReturn(ValidationResult(false, "Word not found in dictionary"))
 
@@ -116,9 +91,7 @@ class WordleControllerTest {
 
     @Test
     fun `sendAttempt returns 401 when user ID is not found in JWT`() {
-        `when`(UserUtils.getExternalId()).thenReturn(null)
-
-        `when`(wordVerificationService.validate("WORLD")).thenReturn(ValidationResult(true))
+        `when`(jwtUtils.getExternalId()).thenReturn(null)
 
         val request = AttemptRequest("WORLD")
 
@@ -142,6 +115,8 @@ class WordleControllerTest {
                 LetterFeedback.ABSENT,
             )
 
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
+        `when`(mockWord.word).thenReturn(targetWord)
         `when`(wordVerificationService.validate(guess)).thenReturn(ValidationResult(true))
         `when`(wordFetcherService.getTodayWord()).thenReturn(mockWord)
         `when`(wordVerificationService.calculateFeedback(guess, targetWord)).thenReturn(feedbacks)
@@ -173,6 +148,8 @@ class WordleControllerTest {
                 LetterFeedback.CORRECT,
             )
 
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
+        `when`(mockWord.word).thenReturn(targetWord)
         `when`(wordVerificationService.validate(guess)).thenReturn(ValidationResult(true))
         `when`(wordFetcherService.getTodayWord()).thenReturn(mockWord)
         `when`(wordVerificationService.calculateFeedback(guess, targetWord)).thenReturn(feedbacks)
@@ -203,6 +180,8 @@ class WordleControllerTest {
                 LetterFeedback.ABSENT,
             )
 
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
+        `when`(mockWord.word).thenReturn(targetWord)
         `when`(wordVerificationService.validate(guess)).thenReturn(ValidationResult(true))
         `when`(wordFetcherService.getTodayWord()).thenReturn(mockWord)
         `when`(wordVerificationService.calculateFeedback(guess, targetWord)).thenReturn(feedbacks)
@@ -232,6 +211,8 @@ class WordleControllerTest {
                 LetterFeedback.ABSENT,
             )
 
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
+        `when`(mockWord.word).thenReturn(targetWord)
         `when`(wordVerificationService.validate(guess)).thenReturn(ValidationResult(true))
         `when`(wordFetcherService.getTodayWord()).thenReturn(mockWord)
         `when`(wordVerificationService.calculateFeedback(guess, targetWord)).thenReturn(feedbacks)
@@ -261,6 +242,8 @@ class WordleControllerTest {
                 LetterFeedback.ABSENT,
             )
 
+        `when`(jwtUtils.getExternalId()).thenReturn("user123")
+        `when`(mockWord.word).thenReturn(targetWord)
         `when`(wordVerificationService.validate(guess)).thenReturn(ValidationResult(true))
         `when`(wordFetcherService.getTodayWord()).thenReturn(mockWord)
         `when`(wordVerificationService.calculateFeedback(guess, targetWord)).thenReturn(feedbacks)
