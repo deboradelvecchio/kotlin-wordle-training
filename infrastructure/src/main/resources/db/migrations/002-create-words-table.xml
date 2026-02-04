@@ -9,6 +9,9 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="word" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="game_date" type="date">
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="created_at" type="timestamp with time zone">
