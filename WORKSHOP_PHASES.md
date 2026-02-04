@@ -510,18 +510,19 @@ spring:
 
 **Backend - SSE:**
 - [ ] Create `SseService`:
-  - `CopyOnWriteArrayList<SseEmitter>` for thread-safe client list
-  - `createEmitter()`: Creates new SSE connection with cleanup callbacks
-  - `broadcast(eventName, data)`: Sends **named events** to all clients
+- `CopyOnWriteArrayList<SseEmitter>` for thread-safe client list
+- `createEmitter()`: Creates new SSE connection with cleanup callbacks
+- `broadcast(eventName, data)`: Sends **named events** to all clients
 - [ ] Create `SseController`:
-  - `GET /api/events/word-of-the-day` returns `SseEmitter`
-  - `@PreAuthorize("permitAll()")` for public access (no auth required)
+- `GET /api/events/word-of-the-day` returns `SseEmitter`
+- `@PreAuthorize("permitAll()")` for public access (no auth required)
 
 **Frontend - Named Events:**
 - [ ] Update `useServerSentEvents` hook to support `eventName` parameter
 - [ ] Use `addEventListener` instead of `onmessage` for named events
 
 **Architecture:**
+
 ```
 Scheduler → Kafka → WordEventConsumer → SseService → Frontend (EventSource)
 ```
@@ -529,16 +530,20 @@ Scheduler → Kafka → WordEventConsumer → SseService → Frontend (EventSour
 **Key Concepts:**
 
 **1. Kafka Deserialization with Type Headers:**
+
 ```yaml
 spring.json.use.type.headers: true  # Uses __TypeId__ header for polymorphic deser
 ```
+
 This allows multiple event types on the same topic without hardcoding a default type.
 
 **2. Named vs Unnamed SSE Events:**
+
 ```kotlin
 // Backend sends NAMED event:
 emitter.send(SseEmitter.event().name("NEW_WORD_OF_THE_DAY").data(payload))
 ```
+
 ```typescript
 // Frontend MUST use addEventListener for named events:
 eventSource.addEventListener("NEW_WORD_OF_THE_DAY", handler)  // ✅
