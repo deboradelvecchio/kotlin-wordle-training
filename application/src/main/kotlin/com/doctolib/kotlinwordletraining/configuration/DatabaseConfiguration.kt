@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
  * Configuration class for database and JPA repositories setup. Enables JPA repositories scanning
  * and configuration.
  */
-@EnableJpaRepositories @Configuration class DatabaseConfiguration {}
+@EnableJpaRepositories(basePackages = ["com.doctolib.kotlinwordletraining.repository"])
+@Configuration
+class DatabaseConfiguration {}

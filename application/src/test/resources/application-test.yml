@@ -31,6 +31,11 @@ interservice:
     test-ctx-propagation.config: '{"local_name": "external-client", "target_service": "external",  "algorithm": "HS256", "secret": "test-secret"}'
 
 
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
 logging:
   level:
     com.doctolib: DEBUG
