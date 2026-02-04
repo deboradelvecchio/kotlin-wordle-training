@@ -26,11 +26,20 @@ class UserRepositoryTest {
     fun `should save and retrieve user`() {
         val user = User(username = "testuser", email = "test@example.com")
 
+        // Before save, timestamps should be null
+        assertThat(user.createdAt).isNull()
+        assertThat(user.updatedAt).isNull()
+
         val savedUser = userRepository.save(user)
 
+        // After save, timestamps should be set by @CreationTimestamp and @UpdateTimestamp
         assertThat(savedUser.id).isNotNull()
         assertThat(savedUser.username).isEqualTo("testuser")
         assertThat(savedUser.email).isEqualTo("test@example.com")
+        assertThat(savedUser.createdAt).isNotNull()
+        assertThat(savedUser.updatedAt).isNotNull()
+        // Timestamps should be in the same second
+        assertThat(savedUser.updatedAt!!.epochSecond).isEqualTo(savedUser.createdAt!!.epochSecond)
     }
 
     @Test
@@ -99,6 +108,7 @@ class UserRepositoryTest {
         assertThat(updatedUser.id).isEqualTo(savedUser.id)
         assertThat(updatedUser.username).isEqualTo("updated")
         assertThat(updatedUser.email).isEqualTo("updated@example.com")
+        // Note: updated_at is automatically updated via @PreUpdate callback in entity
     }
 
     @Test

@@ -3,7 +3,6 @@ package com.doctolib.kotlinwordletraining.service
 import com.doctolib.kotlinwordletraining.entity.User
 import com.doctolib.kotlinwordletraining.repository.UserRepository
 import com.doctolib.kotlinwordletraining.util.UserUtils
-import java.time.Instant
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -54,7 +53,6 @@ class UserService(private val userRepository: UserRepository) {
         username?.let { user.username = it }
         email?.let { user.email = it }
         externalId?.let { user.externalId = it }
-        user.updatedAt = Instant.now()
 
         return userRepository.save(user)
     }

@@ -2,6 +2,8 @@ package com.doctolib.kotlinwordletraining.entity
 
 import jakarta.persistence.*
 import java.time.Instant
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 
 @Entity
 @Table(name = "users")
@@ -10,7 +12,10 @@ class User(
     @Column(nullable = false, unique = true) var username: String,
     @Column(nullable = false, unique = true) var email: String,
     @Column(name = "external_id", unique = true) var externalId: String? = null,
+) {
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
-    @Column(name = "updated_at", nullable = false) var updatedAt: Instant = Instant.now(),
-)
+    var createdAt: Instant? = null
+
+    @UpdateTimestamp @Column(name = "updated_at", nullable = false) var updatedAt: Instant? = null
+}
