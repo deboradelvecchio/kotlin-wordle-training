@@ -15,7 +15,10 @@ open class GameState(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "word_id", nullable = false)
     open val word: Word? = null,
-    @Column(nullable = false) @DataTaxonomy open var state: String = "IN_PROGRESS",
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @DataTaxonomy
+    open var state: GameStatus = GameStatus.IN_PROGRESS,
     @Column(name = "attempts_count", nullable = false)
     @DataTaxonomy
     open var attemptsCount: Int = 0,
