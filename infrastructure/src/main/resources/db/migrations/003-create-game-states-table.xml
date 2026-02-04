@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="003-create-game-states-table" author="kotlin-wordle-training">
+        <createTable tableName="game_states">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_game_states_user" references="users(id)"/>
+            </column>
+            <column name="word_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_game_states_word" references="words(id)"/>
+            </column>
+            <column name="state" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attempts_count" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="solved_at" type="timestamp with time zone">
+                <constraints nullable="true"/>
+            </column>
+            <column name="started_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-game-states-user-word-index" author="kotlin-wordle-training" runInTransaction="false">
+        <ext:createIndexConcurrently tableName="game_states" indexName="idx_game_states_user_word" unique="true">
+            <column name="user_id"/>
+            <column name="word_id"/>
+        </ext:createIndexConcurrently>
+    </changeSet>
+
+</databaseChangeLog>
